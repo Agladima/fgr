@@ -1,0 +1,108 @@
+.card {
+  position: relative;
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+/* VARIANTS */
+.default {
+  border: 1px solid var(--color-border-default);
+  box-shadow: var(--shadow-xs);
+}
+
+.bordered {
+  border: 1px solid var(--color-border-strong);
+  box-shadow: none;
+}
+
+.elevated {
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-md);
+}
+
+.interactive {
+  border: 1px solid var(--color-border-default);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.interactive:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-border-secondary);
+  box-shadow: var(--shadow-lg);
+}
+
+.dark {
+  background-color: var(--color-bg-dark-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-lg);
+}
+
+.dark .cardTitle {
+  color: var(--color-text-inverse);
+}
+
+.dark .cardDescription {
+  color: var(--color-text-inverse-muted);
+}
+
+/* PADDINGS */
+.pad-none {
+  padding: 0;
+}
+
+.pad-sm {
+  padding: var(--space-4);
+}
+
+.pad-md {
+  padding: var(--space-6);
+}
+
+.pad-lg {
+  padding: var(--space-8);
+}
+
+/* SUBCOMPONENTS */
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.cardTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-heading);
+  letter-spacing: -0.01em;
+}
+
+.cardDescription {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-normal);
+  margin-bottom: 0;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.dark .cardFooter {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
