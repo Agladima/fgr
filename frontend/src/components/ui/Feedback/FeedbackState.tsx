@@ -4,7 +4,7 @@ import React from "react";
 import { motion, useReducedMotion } from "motion/react";
 import styles from "./FeedbackState.module.css";
 import Button from "../Button";
-import { CheckCircle2, AlertTriangle, AlertCircle, Inbox, Loader2 } from "lucide-react";
+import { CheckCircle2, AlertCircle, Inbox, Loader2 } from "lucide-react";
 
 export type FeedbackType = "loading" | "error" | "empty" | "success";
 

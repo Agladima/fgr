@@ -1,0 +1,231 @@
+import { NextRequest } from "next/server";
+import { getSupabasePublicClient, getSupabaseServiceClient, isSupabaseConfigured } from "./supabase";
+
+// ============================================================================
+// 1. In-Memory Sliding Window Rate Limiter
+// ============================================================================
+interface RateLimitRecord {
+  timestamps: number[];
+}
+
+const rateLimitStore = new Map<string, RateLimitRecord>();
+
+// Cleanup stale entries periodically (every 10 minutes)
+setInterval(() => {
+  const now = Date.now();
+  const maxAge = 15 * 60 * 1000;
+  for (const [key, record] of rateLimitStore.entries()) {
+    record.timestamps = record.timestamps.filter((ts) => now - ts < maxAge);
+    if (record.timestamps.length === 0) {
+      rateLimitStore.delete(key);
+    }
+  }
+}, 10 * 60 * 1000).unref?.();
+
+export interface RateLimitResult {
+  allowed: boolean;
+  limit: number;
+  remaining: number;
+  resetInSeconds: number;
+}
+
+/**
+ * Checks if a client IP is within rate limits for a given endpoint action.
+ * Default: 6 requests per 10 minutes (600,000 ms).
+ */
+export function checkRateLimit(
+  clientIp: string,
+  actionKey: string,
+  limit = 6,
+  windowMs = 10 * 60 * 1000
+): RateLimitResult {
+  const key = `${actionKey}:${clientIp}`;
+  const now = Date.now();
+
+  let record = rateLimitStore.get(key);
+  if (!record) {
+    record = { timestamps: [] };
+    rateLimitStore.set(key, record);
+  }
+
+  // Filter out timestamps outside current sliding window
+  record.timestamps = record.timestamps.filter((ts) => now - ts < windowMs);
+
+  if (record.timestamps.length >= limit) {
+    const oldest = record.timestamps[0];
+    const resetInSeconds = Math.ceil((oldest + windowMs - now) / 1000);
+    return {
+      allowed: false,
+      limit,
+      remaining: 0,
+      resetInSeconds: Math.max(1, resetInSeconds),
+    };
+  }
+
+  // Record this request
+  record.timestamps.push(now);
+  const remaining = Math.max(0, limit - record.timestamps.length);
+  const resetInSeconds = Math.ceil(windowMs / 1000);
+
+  return {
+    allowed: true,
+    limit,
+    remaining,
+    resetInSeconds,
+  };
+}
+
+// ============================================================================
+// 2. Duplicate Submission Detection (Cooldown Window)
+// ============================================================================
+const recentSubmissions = new Map<string, number>();
+
+/**
+ * Checks for rapid duplicate submissions from the same user/email.
+ * Prevents multiple clicks or spam repetitions within cooldown seconds.
+ */
+export function checkDuplicateSubmission(
+  fingerprint: string,
+  cooldownSeconds = 180
+): boolean {
+  const now = Date.now();
+  const lastTime = recentSubmissions.get(fingerprint);
+
+  if (lastTime && now - lastTime < cooldownSeconds * 1000) {
+    return true; // Is duplicate
+  }
+
+  // Record new submission
+  recentSubmissions.set(fingerprint, now);
+
+  // Evict older records when map grows
+  if (recentSubmissions.size > 2000) {
+    const cutoff = now - 3600 * 1000;
+    for (const [key, ts] of recentSubmissions.entries()) {
+      if (ts < cutoff) recentSubmissions.delete(key);
+    }
+  }
+
+  return false;
+}
+
+// ============================================================================
+// 3. Client IP Resolution
+// ============================================================================
+export function getClientIp(req: NextRequest): string {
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0].trim();
+  }
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
+  return "127.0.0.1";
+}
+
+// ============================================================================
+// 4. Honeypot Spam Check
+// ============================================================================
+export function isSpamSubmission(honeypotField?: string | null): boolean {
+  return Boolean(honeypotField && honeypotField.trim().length > 0);
+}
+
+// ============================================================================
+// 5. Administrator Authentication & Authorization
+// ============================================================================
+export interface AdminAuthResult {
+  isAuthenticated: boolean;
+  userId?: string;
+  email?: string;
+  role?: string;
+  error?: string;
+}
+
+/**
+ * Validates admin authentication via:
+ * 1. Bearer Token with Supabase Auth + active admin profile check
+ * 2. Or secret server ADMIN_API_SECRET_KEY header for automation/internal sync
+ */
+export async function authenticateAdmin(req: NextRequest): Promise<AdminAuthResult> {
+  const authHeader = req.headers.get("authorization");
+  const adminSecretHeader = req.headers.get("x-admin-key");
+
+  // Check secret key header (useful for automated jobs or local testing)
+  const configuredSecret = process.env.ADMIN_API_SECRET_KEY;
+  if (
+    configuredSecret &&
+    adminSecretHeader &&
+    adminSecretHeader === configuredSecret
+  ) {
+    return {
+      isAuthenticated: true,
+      email: "system-admin@fgrcareer.org",
+      role: "super_admin",
+    };
+  }
+
+  // Check Bearer Token
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return {
+      isAuthenticated: false,
+      error: "Missing or invalid Authorization header.",
+    };
+  }
+
+  const token = authHeader.replace("Bearer ", "").trim();
+  if (!token) {
+    return {
+      isAuthenticated: false,
+      error: "Authorization token is empty.",
+    };
+  }
+
+  if (!isSupabaseConfigured()) {
+    // If Supabase is not yet configured with real credentials, deny access safely
+    return {
+      isAuthenticated: false,
+      error: "Database authentication service is not configured.",
+    };
+  }
+
+  try {
+    const supabase = getSupabasePublicClient();
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+
+    if (userError || !userData?.user) {
+      return {
+        isAuthenticated: false,
+        error: "Invalid or expired authorization token.",
+      };
+    }
+
+    const userId = userData.user.id;
+
+    // Check if user is registered in admin_profiles with is_active = true
+    const serviceClient = getSupabaseServiceClient();
+    const { data: profile, error: profileError } = await serviceClient
+      .from("admin_profiles")
+      .select("id, email, role, is_active")
+      .eq("id", userId)
+      .eq("is_active", true)
+      .single();
+
+    if (profileError || !profile) {
+      return {
+        isAuthenticated: false,
+        error: "User does not have active administrative privileges.",
+      };
+    }
+
+    return {
+      isAuthenticated: true,
+      userId: profile.id,
+      email: profile.email,
+      role: profile.role,
+    };
+  } catch (err) {
+    return {
+      isAuthenticated: false,
+      error: (err as Error).message || "Authentication verification failed.",
+    };
+  }
+}

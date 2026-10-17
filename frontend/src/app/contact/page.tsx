@@ -18,6 +18,7 @@ interface ContactFormState {
   phone: string;
   message: string;
   otherInterest: string;
+  hp_field?: string;
 }
 
 const initialFormState: ContactFormState = {
@@ -27,6 +28,7 @@ const initialFormState: ContactFormState = {
   phone: "",
   message: "",
   otherInterest: "",
+  hp_field: "",
 };
 
 export default function ContactPage() {
@@ -105,7 +107,7 @@ export default function ContactPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Prevent duplicate submission
@@ -119,11 +121,42 @@ export default function ContactPage() {
     setIsSubmitting(true);
     setSubmissionError(null);
 
-    // Development submission simulation with clear user feedback
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          interests,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        if (result.error?.details && typeof result.error.details === "object") {
+          const fieldErrors: Record<string, string> = {};
+          for (const [key, msgs] of Object.entries(result.error.details)) {
+            if (Array.isArray(msgs) && msgs.length > 0) {
+              fieldErrors[key] = msgs[0] as string;
+            }
+          }
+          setErrors((prev) => ({ ...prev, ...fieldErrors }));
+        }
+        setSubmissionError(
+          result.error?.message || "Failed to submit enquiry. Please try again."
+        );
+        return;
+      }
+
       setSubmitted(true);
-    }, 700);
+    } catch {
+      setSubmissionError("A network error occurred. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -248,6 +281,18 @@ export default function ContactPage() {
                   />
                 ) : (
                   <form onSubmit={handleSubmit} noValidate>
+                    {/* Honeypot field for bot spam prevention */}
+                    <input
+                      type="text"
+                      name="hp_field"
+                      value={formData.hp_field || ""}
+                      onChange={(e) => handleChange("hp_field", e.target.value)}
+                      style={{ display: "none" }}
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                    />
+
                     {submissionError && (
                       <div className={styles.alertBanner} role="alert">
                         <AlertCircle size={20} style={{ flexShrink: 0, marginTop: "2px" }} />

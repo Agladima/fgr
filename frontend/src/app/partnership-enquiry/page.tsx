@@ -8,7 +8,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import FeedbackState from "@/components/ui/Feedback";
 import MotionSection from "@/components/animations/MotionSection";
 import { isValidEmail, isValidPhone, isNonEmpty } from "@/lib/validation";
-import { ArrowUpRight, AlertCircle, Handshake } from "lucide-react";
+import { ArrowUpRight, AlertCircle } from "lucide-react";
 
 interface PartnershipFormState {
   organisationName: string;
@@ -19,6 +19,7 @@ interface PartnershipFormState {
   otherOrgType: string;
   message: string;
   otherInterestDetails: string;
+  hp_field?: string;
 }
 
 const initialFormState: PartnershipFormState = {
@@ -26,10 +27,11 @@ const initialFormState: PartnershipFormState = {
   contactPerson: "",
   email: "",
   phone: "",
-  organisationType: "Private Sector",
+  organisationType: "",
   otherOrgType: "",
   message: "",
   otherInterestDetails: "",
+  hp_field: "",
 };
 
 export default function PartnershipEnquiryPage() {
@@ -141,7 +143,7 @@ export default function PartnershipEnquiryPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Prevent duplicate submission
@@ -155,11 +157,42 @@ export default function PartnershipEnquiryPage() {
     setIsSubmitting(true);
     setSubmissionError(null);
 
-    // Simulated network submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const response = await fetch("/api/partnership", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          interests: selectedInterests,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        if (result.error?.details && typeof result.error.details === "object") {
+          const fieldErrors: Record<string, string> = {};
+          for (const [key, msgs] of Object.entries(result.error.details)) {
+            if (Array.isArray(msgs) && msgs.length > 0) {
+              fieldErrors[key] = msgs[0] as string;
+            }
+          }
+          setErrors((prev) => ({ ...prev, ...fieldErrors }));
+        }
+        setSubmissionError(
+          result.error?.message || "Failed to submit partnership enquiry. Please try again."
+        );
+        return;
+      }
+
       setSubmitted(true);
-    }, 700);
+    } catch {
+      setSubmissionError("A network error occurred. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -212,6 +245,18 @@ export default function PartnershipEnquiryPage() {
                 />
               ) : (
                 <form onSubmit={handleSubmit} noValidate>
+                  {/* Honeypot field for bot spam prevention */}
+                  <input
+                    type="text"
+                    name="hp_field"
+                    value={formData.hp_field || ""}
+                    onChange={(e) => handleChange("hp_field", e.target.value)}
+                    style={{ display: "none" }}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                  />
+
                   {submissionError && (
                     <div className={styles.alertBanner} role="alert">
                       <AlertCircle size={20} style={{ flexShrink: 0, marginTop: "2px" }} />
@@ -330,6 +375,7 @@ export default function PartnershipEnquiryPage() {
                         onChange={(e) => handleChange("organisationType", e.target.value)}
                         disabled={isSubmitting}
                       >
+                        <option value="">Select Organisation Type</option>
                         {organisationTypes.map((type) => (
                           <option key={type} value={type}>
                             {type}

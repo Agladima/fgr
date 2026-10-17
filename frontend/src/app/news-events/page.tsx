@@ -7,7 +7,6 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import MotionSection from "@/components/animations/MotionSection";
 import { StaggerGroup, StaggerItem } from "@/components/animations/StaggerGroup";
 import { PRIMARY_CTAS } from "@/lib/constants/navigation";
-import { ArrowRight, ArrowUpRight, Calendar, Tag } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "News & Events",

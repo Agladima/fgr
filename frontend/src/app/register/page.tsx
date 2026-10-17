@@ -8,7 +8,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import FeedbackState from "@/components/ui/Feedback";
 import MotionSection from "@/components/animations/MotionSection";
 import { isValidEmail, isValidPhone, isNonEmpty } from "@/lib/validation";
-import { ArrowUpRight, AlertCircle, AlertTriangle } from "lucide-react";
+import { ArrowUpRight, AlertCircle } from "lucide-react";
 
 interface FormState {
   fullName: string;
@@ -20,10 +20,10 @@ interface FormState {
   currentStatus: string;
   otherOccupation: string;
   previousTraining: string;
-  trainingPreference: string;
   referralSource: string;
   otherReferral: string;
   additionalInfo: string;
+  hp_field?: string;
 }
 
 const initialFormState: FormState = {
@@ -31,15 +31,15 @@ const initialFormState: FormState = {
   phone: "",
   email: "",
   age: "",
-  location: "Calabar, Cross River State",
-  programme: "Employability & Career Development",
-  currentStatus: "Unemployed / Job Seeker",
+  location: "",
+  programme: "",
+  currentStatus: "",
   otherOccupation: "",
   previousTraining: "",
-  trainingPreference: "In-Person (Calabar Hub)",
-  referralSource: "Social Media",
+  referralSource: "",
   otherReferral: "",
   additionalInfo: "",
+  hp_field: "",
 };
 
 export default function RegisterPage() {
@@ -104,9 +104,7 @@ export default function RegisterPage() {
       newErrors.otherOccupation = "Please specify your current occupation.";
     }
 
-    if (!isNonEmpty(formData.trainingPreference)) {
-      newErrors.trainingPreference = "Please select your preferred training format.";
-    }
+
 
     if (formData.referralSource === "Other" && !isNonEmpty(formData.otherReferral)) {
       newErrors.otherReferral = "Please describe how you heard about us.";
@@ -116,7 +114,7 @@ export default function RegisterPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Prevent accidental duplicate submissions
@@ -130,11 +128,39 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     setSubmissionError(null);
 
-    // Simulated network submission with duplicate prevention
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        if (result.error?.details && typeof result.error.details === "object") {
+          const fieldErrors: Partial<Record<keyof FormState, string>> = {};
+          for (const [key, msgs] of Object.entries(result.error.details)) {
+            if (Array.isArray(msgs) && msgs.length > 0) {
+              fieldErrors[key as keyof FormState] = msgs[0] as string;
+            }
+          }
+          setErrors((prev) => ({ ...prev, ...fieldErrors }));
+        }
+        setSubmissionError(
+          result.error?.message || "Failed to submit registration. Please try again."
+        );
+        return;
+      }
+
       setSubmitted(true);
-    }, 700);
+    } catch {
+      setSubmissionError("A network error occurred. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -185,6 +211,18 @@ export default function RegisterPage() {
                 />
               ) : (
                 <form onSubmit={handleSubmit} noValidate>
+                  {/* Honeypot field for bot spam prevention */}
+                  <input
+                    type="text"
+                    name="hp_field"
+                    value={formData.hp_field || ""}
+                    onChange={(e) => handleChange("hp_field", e.target.value)}
+                    style={{ display: "none" }}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                  />
+
                   {submissionError && (
                     <div className={styles.alertBanner} role="alert">
                       <AlertCircle size={20} style={{ flexShrink: 0, marginTop: "2px" }} />
@@ -334,6 +372,7 @@ export default function RegisterPage() {
                           aria-describedby={errors.programme ? "programme-error" : undefined}
                           disabled={isSubmitting}
                         >
+                          <option value="">Select a Programme</option>
                           <option value="Employability & Career Development">
                             01 — Employability &amp; Career Development
                           </option>
@@ -360,84 +399,59 @@ export default function RegisterPage() {
                     </div>
 
                     {/* Current Occupation / Status (with conditional field) */}
-                    <div className={styles.rowTwo}>
-                      <div>
-                        <label className={styles.label} htmlFor="currentStatus">
-                          Current Occupation / Status *
-                        </label>
-                        <select
-                          id="currentStatus"
-                          className={`${styles.select} ${errors.currentStatus ? styles.inputError : ""}`}
-                          value={formData.currentStatus}
-                          onChange={(e) => handleChange("currentStatus", e.target.value)}
-                          aria-invalid={!!errors.currentStatus}
-                          aria-describedby={errors.currentStatus ? "currentStatus-error" : undefined}
-                          disabled={isSubmitting}
-                        >
-                          <option value="Student / Recent Graduate">Student / Recent Graduate</option>
-                          <option value="Unemployed / Job Seeker">Unemployed / Job Seeker</option>
-                          <option value="Self-Employed / Entrepreneur">Self-Employed / Entrepreneur</option>
-                          <option value="Employed Professional">Employed Professional</option>
-                          <option value="Other">Other</option>
-                        </select>
-                        {errors.currentStatus && (
-                          <div id="currentStatus-error" className={styles.fieldError} role="alert">
-                            <AlertCircle size={13} />
-                            <span>{errors.currentStatus}</span>
-                          </div>
-                        )}
+                    {/* Current Occupation / Status (with conditional field) */}
+                    <div>
+                      <label className={styles.label} htmlFor="currentStatus">
+                        Current Occupation / Status *
+                      </label>
+                      <select
+                        id="currentStatus"
+                        className={`${styles.select} ${errors.currentStatus ? styles.inputError : ""}`}
+                        value={formData.currentStatus}
+                        onChange={(e) => handleChange("currentStatus", e.target.value)}
+                        aria-invalid={!!errors.currentStatus}
+                        aria-describedby={errors.currentStatus ? "currentStatus-error" : undefined}
+                        disabled={isSubmitting}
+                      >
+                        <option value="">Select Current Occupation / Status</option>
+                        <option value="Student / Recent Graduate">Student / Recent Graduate</option>
+                        <option value="Unemployed / Job Seeker">Unemployed / Job Seeker</option>
+                        <option value="Self-Employed / Entrepreneur">Self-Employed / Entrepreneur</option>
+                        <option value="Employed Professional">Employed Professional</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      {errors.currentStatus && (
+                        <div id="currentStatus-error" className={styles.fieldError} role="alert">
+                          <AlertCircle size={13} />
+                          <span>{errors.currentStatus}</span>
+                        </div>
+                      )}
 
-                        {/* Conditional field for Occupation: Other */}
-                        {formData.currentStatus === "Other" && (
-                          <div className={styles.conditionalBox}>
-                            <label className={styles.label} htmlFor="otherOccupation">
-                              Please specify your occupation/status *
-                            </label>
-                            <input
-                              id="otherOccupation"
-                              type="text"
-                              className={`${styles.input} ${errors.otherOccupation ? styles.inputError : ""}`}
-                              placeholder="e.g. Freelance Artisan / Career Break"
-                              value={formData.otherOccupation}
-                              onChange={(e) => handleChange("otherOccupation", e.target.value)}
-                              aria-invalid={!!errors.otherOccupation}
-                              aria-describedby={errors.otherOccupation ? "otherOccupation-error" : undefined}
-                              disabled={isSubmitting}
-                            />
-                            {errors.otherOccupation && (
-                              <div id="otherOccupation-error" className={styles.fieldError} role="alert">
-                                <AlertCircle size={13} />
-                                <span>{errors.otherOccupation}</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className={styles.label} htmlFor="trainingPreference">
-                          Training Preference *
-                        </label>
-                        <select
-                          id="trainingPreference"
-                          className={`${styles.select} ${errors.trainingPreference ? styles.inputError : ""}`}
-                          value={formData.trainingPreference}
-                          onChange={(e) => handleChange("trainingPreference", e.target.value)}
-                          aria-invalid={!!errors.trainingPreference}
-                          aria-describedby={errors.trainingPreference ? "trainingPreference-error" : undefined}
-                          disabled={isSubmitting}
-                        >
-                          <option value="In-Person (Calabar Hub)">In-Person (Calabar Hub)</option>
-                          <option value="Online / Virtual Learning">Online / Virtual Learning</option>
-                          <option value="Hybrid (In-person & Online)">Hybrid (In-person &amp; Online)</option>
-                        </select>
-                        {errors.trainingPreference && (
-                          <div id="trainingPreference-error" className={styles.fieldError} role="alert">
-                            <AlertCircle size={13} />
-                            <span>{errors.trainingPreference}</span>
-                          </div>
-                        )}
-                      </div>
+                      {/* Conditional field for Occupation: Other */}
+                      {formData.currentStatus === "Other" && (
+                        <div className={styles.conditionalBox}>
+                          <label className={styles.label} htmlFor="otherOccupation">
+                            Please specify your occupation/status *
+                          </label>
+                          <input
+                            id="otherOccupation"
+                            type="text"
+                            className={`${styles.input} ${errors.otherOccupation ? styles.inputError : ""}`}
+                            placeholder="e.g. Freelance Artisan / Career Break"
+                            value={formData.otherOccupation}
+                            onChange={(e) => handleChange("otherOccupation", e.target.value)}
+                            aria-invalid={!!errors.otherOccupation}
+                            aria-describedby={errors.otherOccupation ? "otherOccupation-error" : undefined}
+                            disabled={isSubmitting}
+                          />
+                          {errors.otherOccupation && (
+                            <div id="otherOccupation-error" className={styles.fieldError} role="alert">
+                              <AlertCircle size={13} />
+                              <span>{errors.otherOccupation}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {/* Previous Training */}
@@ -468,6 +482,7 @@ export default function RegisterPage() {
                         onChange={(e) => handleChange("referralSource", e.target.value)}
                         disabled={isSubmitting}
                       >
+                        <option value="">Select Referral Source (Optional)</option>
                         <option value="Social Media">Social Media (LinkedIn, Facebook, X, Instagram)</option>
                         <option value="Word of Mouth">Friend, Colleague or Word of Mouth</option>
                         <option value="Partner Organisation">Partner Organisation or University</option>

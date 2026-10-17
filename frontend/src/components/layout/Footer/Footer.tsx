@@ -49,6 +49,7 @@ export const Footer: React.FC = () => {
   const [currentYear, setCurrentYear] = useState<number>(2026);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentYear(new Date().getFullYear());
   }, []);
 
@@ -238,7 +239,7 @@ export const Footer: React.FC = () => {
       <div className={styles.bottomBar}>
         <Container size="wide" className={styles.bottomBarContainer}>
           <div className={styles.copyright}>
-            © {currentYear} FGR Career Development Center. All Rights Reserved. • Calabar, Cross River State, Nigeria
+            © {currentYear ?? 2026} FGR Career Development Center. All Rights Reserved. • Calabar, Cross River State, Nigeria
           </div>
 
           <div className={styles.taglineCenter}>

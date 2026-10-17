@@ -12,7 +12,6 @@ import {
   DESKTOP_NAV_ITEMS,
   MAIN_NAV_ITEMS,
   PRIMARY_CTAS,
-  SITE_METADATA,
 } from "@/lib/constants/navigation";
 import { Menu, X, ArrowUpRight, ChevronDown } from "lucide-react";
 
@@ -21,8 +20,16 @@ export const Header: React.FC = () => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+  const [prevPathname, setPrevPathname] = useState(pathname);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const shouldReduceMotion = useReducedMotion();
+
+  // Close menus on route change during render
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setMobileMenuOpen(false);
+    setOpenDropdown(null);
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,12 +39,6 @@ export const Header: React.FC = () => {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Close menus on route change
-  useEffect(() => {
-    setMobileMenuOpen(false);
-    setOpenDropdown(null);
-  }, [pathname]);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {

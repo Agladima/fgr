@@ -6,7 +6,7 @@ import Button from "@/components/ui/Button";
 import SectionHeading from "@/components/ui/SectionHeading";
 import MotionSection from "@/components/animations/MotionSection";
 import { StaggerGroup, StaggerItem } from "@/components/animations/StaggerGroup";
-import { FileText, ArrowRight } from "lucide-react";
+import { FileText } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Our Impact",

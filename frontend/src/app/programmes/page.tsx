@@ -10,12 +10,10 @@ import { PRIMARY_CTAS } from "@/lib/constants/navigation";
 import {
   CheckCircle2,
   ArrowUpRight,
-  BookOpen,
   Wrench,
   Cpu,
   TrendingUp,
   Award,
-  Layers,
 } from "lucide-react";
 
 export const metadata: Metadata = {

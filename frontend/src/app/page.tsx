@@ -15,12 +15,9 @@ import {
   Cpu,
   TrendingUp,
   Award,
-  Users,
   GraduationCap,
   Building2,
   Handshake,
-  CheckCircle2,
-  Calendar,
 } from "lucide-react";
 
 export default function Home() {
