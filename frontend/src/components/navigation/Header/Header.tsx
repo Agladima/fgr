@@ -24,6 +24,7 @@ export const Header: React.FC = () => {
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
+
   // Close menus on route change during render
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);
@@ -64,6 +65,10 @@ export const Header: React.FC = () => {
       setOpenDropdown(null);
     }, 150);
   };
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <>

@@ -165,12 +165,93 @@ export interface SuccessStory {
   updated_at: string;
 }
 
+export type StaffRole =
+  | 'super_admin'
+  | 'admin'
+  | 'training_officer'
+  | 'partnerships_officer'
+  | 'content_manager';
+
 export interface AdminProfile {
   id: string;
   email: string;
   full_name: string;
-  role: 'super_admin' | 'admin' | 'editor' | 'reviewer';
+  role: StaffRole;
   is_active: boolean;
   created_at: string;
   updated_at: string;
 }
+
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
+export type TaskRelatedType = 'registration' | 'partnership' | 'enquiry' | 'programme' | 'event' | 'general';
+
+export interface FollowUpTask {
+  id: string;
+  title: string;
+  description?: string | null;
+  assigned_to?: string | null;
+  assigned_to_profile?: AdminProfile | null;
+  created_by?: string | null;
+  created_by_profile?: AdminProfile | null;
+  related_type: TaskRelatedType;
+  related_id?: string | null;
+  due_date?: string | null;
+  priority: TaskPriority;
+  status: TaskStatus;
+  completed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InternalNote {
+  id: string;
+  author_id?: string | null;
+  author_name: string;
+  record_type: 'registration' | 'partnership' | 'enquiry' | 'task' | 'general';
+  record_id: string;
+  content: string;
+  created_at: string;
+}
+
+export interface AuditLog {
+  id: string;
+  actor_id?: string | null;
+  actor_email: string;
+  actor_role: string;
+  action: string;
+  resource_type: string;
+  resource_id?: string | null;
+  details?: Record<string, unknown> | null;
+  ip_address?: string | null;
+  created_at: string;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  type: string;
+  contact_person?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  partnership_status: 'prospect' | 'in_discussion' | 'confirmed' | 'inactive';
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TrainingCohort {
+  id: string;
+  programme_id?: string | null;
+  name: string;
+  cohort_code?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  capacity: number;
+  enrolled_count: number;
+  delivery_mode: 'In-Person' | 'Online' | 'Hybrid';
+  status: 'upcoming' | 'in_progress' | 'completed' | 'cancelled';
+  created_at: string;
+  updated_at: string;
+}
+

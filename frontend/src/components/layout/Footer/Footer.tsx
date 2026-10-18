@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import styles from "./Footer.module.css";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
@@ -46,12 +47,17 @@ const XIcon = () => (
 );
 
 export const Footer: React.FC = () => {
+  const pathname = usePathname();
   const [currentYear, setCurrentYear] = useState<number>(2026);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentYear(new Date().getFullYear());
   }, []);
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   const servicePillars = [
     "Training & Skills Development",

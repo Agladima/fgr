@@ -132,21 +132,129 @@ export function isSpamSubmission(honeypotField?: string | null): boolean {
 // ============================================================================
 // 5. Administrator Authentication & Authorization
 // ============================================================================
+export type PermissionKey =
+  | 'registrations:read'
+  | 'registrations:write'
+  | 'registrations:export'
+  | 'partnerships:read'
+  | 'partnerships:write'
+  | 'enquiries:read'
+  | 'enquiries:write'
+  | 'programmes:read'
+  | 'programmes:write'
+  | 'events:read'
+  | 'events:write'
+  | 'content:read'
+  | 'content:write'
+  | 'follow_ups:read'
+  | 'follow_ups:write'
+  | 'reports:read'
+  | 'reports:export'
+  | 'staff:manage'
+  | 'audit_logs:read'
+  | 'settings:manage';
+
+const ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
+  super_admin: [
+    'registrations:read',
+    'registrations:write',
+    'registrations:export',
+    'partnerships:read',
+    'partnerships:write',
+    'enquiries:read',
+    'enquiries:write',
+    'programmes:read',
+    'programmes:write',
+    'events:read',
+    'events:write',
+    'content:read',
+    'content:write',
+    'follow_ups:read',
+    'follow_ups:write',
+    'reports:read',
+    'reports:export',
+    'staff:manage',
+    'audit_logs:read',
+    'settings:manage',
+  ],
+  admin: [
+    'registrations:read',
+    'registrations:write',
+    'registrations:export',
+    'partnerships:read',
+    'partnerships:write',
+    'enquiries:read',
+    'enquiries:write',
+    'programmes:read',
+    'programmes:write',
+    'events:read',
+    'events:write',
+    'content:read',
+    'content:write',
+    'follow_ups:read',
+    'follow_ups:write',
+    'reports:read',
+    'reports:export',
+    'audit_logs:read',
+  ],
+  training_officer: [
+    'registrations:read',
+    'registrations:write',
+    'registrations:export',
+    'programmes:read',
+    'events:read',
+    'follow_ups:read',
+    'follow_ups:write',
+    'reports:read',
+  ],
+  partnerships_officer: [
+    'partnerships:read',
+    'partnerships:write',
+    'enquiries:read',
+    'enquiries:write',
+    'follow_ups:read',
+    'follow_ups:write',
+    'reports:read',
+  ],
+  content_manager: [
+    'programmes:read',
+    'programmes:write',
+    'events:read',
+    'events:write',
+    'content:read',
+    'content:write',
+    'follow_ups:read',
+    'reports:read',
+  ],
+};
+
+/**
+ * Centralized Role-Based Access Control validator
+ */
+export function hasPermission(role: string, permission: PermissionKey): boolean {
+  const allowed = ROLE_PERMISSIONS[role];
+  if (!allowed) return false;
+  return allowed.includes(permission);
+}
+
 export interface AdminAuthResult {
   isAuthenticated: boolean;
   userId?: string;
   email?: string;
+  fullName?: string;
   role?: string;
   error?: string;
 }
 
 /**
  * Validates admin authentication via:
- * 1. Bearer Token with Supabase Auth + active admin profile check
- * 2. Or secret server ADMIN_API_SECRET_KEY header for automation/internal sync
+ * 1. HTTP-only cookie 'fgr_admin_token'
+ * 2. Bearer Authorization header
+ * 3. Or server ADMIN_API_SECRET_KEY header for local testing/automation
  */
 export async function authenticateAdmin(req: NextRequest): Promise<AdminAuthResult> {
   const authHeader = req.headers.get("authorization");
+  const cookieToken = req.cookies.get("fgr_admin_token")?.value;
   const adminSecretHeader = req.headers.get("x-admin-key");
 
   // Check secret key header (useful for automated jobs or local testing)
@@ -159,28 +267,25 @@ export async function authenticateAdmin(req: NextRequest): Promise<AdminAuthResu
     return {
       isAuthenticated: true,
       email: "system-admin@fgrcareer.org",
+      fullName: "System Super Administrator",
       role: "super_admin",
     };
   }
 
-  // Check Bearer Token
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return {
-      isAuthenticated: false,
-      error: "Missing or invalid Authorization header.",
-    };
+  // Extract token from cookie or Bearer header
+  let token = cookieToken;
+  if (!token && authHeader?.startsWith("Bearer ")) {
+    token = authHeader.replace("Bearer ", "").trim();
   }
 
-  const token = authHeader.replace("Bearer ", "").trim();
   if (!token) {
     return {
       isAuthenticated: false,
-      error: "Authorization token is empty.",
+      error: "Authentication required. Please sign in to access the CRM.",
     };
   }
 
   if (!isSupabaseConfigured()) {
-    // If Supabase is not yet configured with real credentials, deny access safely
     return {
       isAuthenticated: false,
       error: "Database authentication service is not configured.",
@@ -194,7 +299,7 @@ export async function authenticateAdmin(req: NextRequest): Promise<AdminAuthResu
     if (userError || !userData?.user) {
       return {
         isAuthenticated: false,
-        error: "Invalid or expired authorization token.",
+        error: "Session expired or invalid authorization token. Please sign in again.",
       };
     }
 
@@ -204,7 +309,7 @@ export async function authenticateAdmin(req: NextRequest): Promise<AdminAuthResu
     const serviceClient = getSupabaseServiceClient();
     const { data: profile, error: profileError } = await serviceClient
       .from("admin_profiles")
-      .select("id, email, role, is_active")
+      .select("id, email, full_name, role, is_active")
       .eq("id", userId)
       .eq("is_active", true)
       .single();
@@ -212,7 +317,7 @@ export async function authenticateAdmin(req: NextRequest): Promise<AdminAuthResu
     if (profileError || !profile) {
       return {
         isAuthenticated: false,
-        error: "User does not have active administrative privileges.",
+        error: "Your staff account has been deactivated or does not have authorized CRM privileges.",
       };
     }
 
@@ -220,6 +325,7 @@ export async function authenticateAdmin(req: NextRequest): Promise<AdminAuthResu
       isAuthenticated: true,
       userId: profile.id,
       email: profile.email,
+      fullName: profile.full_name,
       role: profile.role,
     };
   } catch (err) {
@@ -229,3 +335,47 @@ export async function authenticateAdmin(req: NextRequest): Promise<AdminAuthResu
     };
   }
 }
+
+/**
+ * Records an entry into the audit_logs table
+ */
+export async function recordAuditLog({
+  actorId,
+  actorEmail,
+  actorRole,
+  action,
+  resourceType,
+  resourceId,
+  details,
+  ipAddress,
+}: {
+  actorId?: string;
+  actorEmail: string;
+  actorRole: string;
+  action: string;
+  resourceType: string;
+  resourceId?: string | null;
+  details?: Record<string, unknown>;
+  ipAddress?: string;
+}): Promise<void> {
+  try {
+    if (!isSupabaseConfigured()) return;
+    const supabase = getSupabaseServiceClient();
+    await supabase.from("audit_logs").insert([
+      {
+        actor_id: actorId || null,
+        actor_email: actorEmail,
+        actor_role: actorRole,
+        action,
+        resource_type: resourceType,
+        resource_id: resourceId || null,
+        details: details || {},
+        ip_address: ipAddress || null,
+      },
+    ]);
+  } catch (err) {
+    // Non-blocking catch so audit failure never crashes application operation
+    console.error("[Audit Log Error]", err);
+  }
+}
+
