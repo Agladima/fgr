@@ -1,21 +1,40 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAdminAuth } from "@/lib/admin/auth-context";
 import styles from "./login.module.css";
-import { Mail, Lock, AlertCircle, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { Mail, Lock, AlertCircle, ArrowRight, Loader2, ShieldCheck, Clock, CheckCircle2 } from "lucide-react";
 
 export default function AdminLoginPage() {
   const { login } = useAdminAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [timeoutNotice, setTimeoutNotice] = useState<string | null>(null);
+  const [successNotice, setSuccessNotice] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("reason") === "timeout") {
+        setTimeoutNotice(
+          "Your session was automatically signed out due to 5 minutes of inactivity for security. Please sign in again."
+        );
+      } else if (params.get("reason") === "password_updated") {
+        setSuccessNotice(
+          "Your password has been successfully updated. Please log in with your new password."
+        );
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setTimeoutNotice(null);
+    setSuccessNotice(null);
 
     if (!email.trim() || !password) {
       setError("Please enter both email address and password.");
@@ -39,6 +58,20 @@ export default function AdminLoginPage() {
           <h1 className={styles.brandTitle}>FGR Operations CRM</h1>
           <p className={styles.brandSubtitle}>Staff and administrator portal sign-in</p>
         </div>
+
+        {successNotice && (
+          <div className={styles.successBanner} role="status">
+            <CheckCircle2 size={18} style={{ flexShrink: 0, marginTop: 2, color: "#16a34a" }} />
+            <span>{successNotice}</span>
+          </div>
+        )}
+
+        {timeoutNotice && (
+          <div className={styles.warningBanner} role="status">
+            <Clock size={18} style={{ flexShrink: 0, marginTop: 2, color: "#d97706" }} />
+            <span>{timeoutNotice}</span>
+          </div>
+        )}
 
         {error && (
           <div className={styles.errorBanner} role="alert">
@@ -69,9 +102,17 @@ export default function AdminLoginPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="password">
-              Password
-            </label>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <label className={styles.label} htmlFor="password">
+                Password
+              </label>
+              <Link
+                href="/admin/reset-password"
+                style={{ fontSize: "12px", color: "var(--color-accent, #c49a45)", textDecoration: "none" }}
+              >
+                Forgot password?
+              </Link>
+            </div>
             <div className={styles.inputWrapper}>
               <Lock size={16} className={styles.inputIcon} aria-hidden="true" />
               <input

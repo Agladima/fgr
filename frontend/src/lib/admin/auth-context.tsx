@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { StaffRole } from "@/lib/server/types";
+import InactivityWatcher from "@/components/admin/InactivityWatcher/InactivityWatcher";
 
 export interface AdminUser {
   id: string;
@@ -17,7 +18,7 @@ interface AdminAuthContextValue {
   isAuthenticated: boolean;
   isSuperAdmin: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => Promise<void>;
+  logout: (reason?: string) => Promise<void>;
   hasRole: (roles: StaffRole[]) => boolean;
   canAccess: (permission: string) => boolean;
   refreshUser: () => Promise<void>;
@@ -58,11 +59,11 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading) return;
 
-    const isLoginPage = pathname === "/admin/login";
+    const isPublicAdminPage = pathname === "/admin/login" || pathname === "/admin/reset-password";
 
-    if (!user && !isLoginPage && pathname.startsWith("/admin")) {
+    if (!user && !isPublicAdminPage && pathname.startsWith("/admin")) {
       router.replace("/admin/login");
-    } else if (user && isLoginPage) {
+    } else if (user && pathname === "/admin/login") {
       router.replace("/admin");
     }
   }, [user, loading, pathname, router]);
@@ -84,6 +85,11 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       setUser(data.data.user);
+      try {
+        localStorage.setItem("fgr_admin_last_activity", Date.now().toString());
+      } catch {
+        // Ignore
+      }
       router.replace("/admin");
       return { success: true };
     } catch {
@@ -94,14 +100,23 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = async () => {
+  const logout = async (reason?: string) => {
     try {
       await fetch("/api/admin/auth/logout", { method: "POST" });
     } catch {
       // Ignore
     }
     setUser(null);
-    router.replace("/admin/login");
+    try {
+      localStorage.removeItem("fgr_admin_last_activity");
+    } catch {
+      // Ignore
+    }
+    if (reason === "timeout") {
+      router.replace("/admin/login?reason=timeout");
+    } else {
+      router.replace("/admin/login");
+    }
   };
 
   const hasRole = (roles: StaffRole[]) => {
@@ -152,6 +167,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         refreshUser: fetchCurrentUser,
       }}
     >
+      <InactivityWatcher />
       {children}
     </AdminAuthContext.Provider>
   );

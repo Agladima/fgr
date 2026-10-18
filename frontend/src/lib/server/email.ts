@@ -631,3 +631,114 @@ export async function sendPartnershipStaffNotification(
     return { delivered: false, error: (err as Error).message };
   }
 }
+
+// ============================================================================
+// 4. Staff Provisioning Welcome & Password Reset Notification
+// ============================================================================
+
+const STAFF_ROLE_LABELS: Record<string, string> = {
+  super_admin: "Super Administrator (Full System Control)",
+  admin: "Administrator (CRM & Operations)",
+  training_officer: "Training Officer (Registrations & Cohorts)",
+  partnerships_officer: "Partnerships Officer (Enquiries & Partners)",
+  content_manager: "Content Manager (Programmes & Website Content)",
+};
+
+export interface StaffWelcomePayload {
+  fullName: string;
+  email: string;
+  jobTitle?: string;
+  role: string;
+  temporaryPassword?: string;
+  resetUrl: string;
+  loginUrl: string;
+}
+
+/**
+ * Dispatches an official onboarding email to a newly created staff member
+ * containing their assigned role, temporary password, and direct password reset link.
+ */
+export async function sendStaffWelcomeEmail(
+  payload: StaffWelcomePayload
+): Promise<EmailDeliveryResult> {
+  const resend = getResendClient();
+  if (!resend) {
+    console.warn(
+      `[Email] Resend API key not configured. Staff welcome credentials for ${payload.email}: Temp Password: ${payload.temporaryPassword}, Reset URL: ${payload.resetUrl}`
+    );
+    return { delivered: false, reason: "RESEND_NOT_CONFIGURED" };
+  }
+
+  const roleLabel =
+    STAFF_ROLE_LABELS[payload.role] || payload.role.replace(/_/g, " ").toUpperCase();
+
+  try {
+    const html = wrapHtmlEmail(
+      "Welcome to FGR Career Development Center Staff Portal",
+      `Your staff account has been provisioned. Access credentials and security reset instructions enclosed.`,
+      `
+      <div class="badge">Internal Staff Access Provisioned</div>
+      <h1 class="heading">Welcome to the Team, ${payload.fullName}!</h1>
+      <p>
+        An official staff account has been set up for you on the <strong>FGR Career Development Center Operations CRM</strong>.
+        You can now access your dashboard to manage programmes, training cohorts, enquiries, and organizational data.
+      </p>
+
+      <div class="info-card">
+        <table class="info-table" role="presentation">
+          <tr><td class="label">Staff Name:</td><td class="value"><strong>${payload.fullName}</strong></td></tr>
+          <tr><td class="label">Official Email:</td><td class="value"><code>${payload.email}</code></td></tr>
+          ${payload.jobTitle ? `<tr><td class="label">Job Title / Position:</td><td class="value"><strong>${payload.jobTitle}</strong></td></tr>` : ""}
+          <tr><td class="label">Permission Level:</td><td class="value">${roleLabel}</td></tr>
+        </table>
+      </div>
+
+      ${payload.temporaryPassword ? `
+      <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 18px 20px; margin: 24px 0;">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; margin-bottom: 6px;">
+          Your Temporary Password
+        </div>
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: 0.05em; background: #ffffff; padding: 10px 14px; border-radius: 6px; border: 1px dashed #94a3b8; display: inline-block;">
+          ${payload.temporaryPassword}
+        </div>
+        <p style="font-size: 12px; color: #64748b; margin: 8px 0 0 0;">
+          Please use this temporary password on your first sign-in, or click the direct password reset link below.
+        </p>
+      </div>
+      ` : ""}
+
+      <div class="button-wrap" style="margin: 28px 0 16px 0;">
+        <a class="button" href="${payload.resetUrl}">Set Your Permanent Password</a>
+      </div>
+
+      <p style="font-size: 13px; color: #64748b; text-align: center; margin: 0 0 24px 0;">
+        Or sign in directly to the CRM: <a href="${payload.loginUrl}" style="color: #c49a45; font-weight: 600;">${payload.loginUrl}</a>
+      </p>
+
+      <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 14px 16px; margin-top: 24px;">
+        <strong style="color: #92400e; font-size: 13px; display: block; margin-bottom: 4px;">Security Notice</strong>
+        <span style="color: #78350f; font-size: 12.5px; line-height: 1.5; display: block;">
+          Do not share this email or your temporary password with anyone. For your security, this password reset link is one-time use and will expire. If you did not expect this invitation, please immediately contact our system administrators at <a href="mailto:contact@fgrcareer.org" style="color: #92400e;">contact@fgrcareer.org</a>.
+        </span>
+      </div>
+      `
+    );
+
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [payload.email],
+      subject: `Welcome to FGR Career Center — Staff Account Credentials & Password Setup`,
+      html,
+    });
+
+    if (error) {
+      console.error("[Email] Failed to send staff welcome email:", error);
+      return { delivered: false, error: error.message };
+    }
+    return { delivered: true, messageId: data?.id };
+  } catch (err) {
+    console.error("[Email] Error dispatching staff welcome email:", err);
+    return { delivered: false, error: (err as Error).message };
+  }
+}
+

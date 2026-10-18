@@ -65,15 +65,50 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   try {
     const supabase = getSupabaseServiceClient();
-    const { data: updatedProfile, error: dbError } = await supabase
+    let { data: updatedProfile, error: dbError } = await supabase
       .from("admin_profiles")
       .update(updates)
       .eq("id", id)
       .select()
       .single();
 
-    if (dbError || !updatedProfile) {
-      return errorResponse("Staff member not found or update failed.", 404, "NOT_FOUND", dbError?.message);
+    if (dbError && (dbError.code === "42703" || dbError.message?.includes("job_title"))) {
+      delete updates.job_title;
+      const retry = await supabase
+        .from("admin_profiles")
+        .update(updates)
+        .eq("id", id)
+        .select()
+        .single();
+      updatedProfile = retry.data;
+      dbError = retry.error;
+    }
+
+    if (dbError) {
+      if (dbError.code === "23514") {
+        return errorResponse(
+          "This role is not allowed by the database check constraint. Please run the SQL migration in Supabase to update admin_profiles_role_check.",
+          400,
+          "ROLE_CONSTRAINT_VIOLATION",
+          dbError.message
+        );
+      }
+      return errorResponse("Failed to update staff record.", 500, "DB_ERROR", dbError.message);
+    }
+
+    if (!updatedProfile) {
+      return errorResponse("Staff member not found.", 404, "NOT_FOUND");
+    }
+
+    // Keep Supabase Auth user metadata in sync
+    if (updates.role) {
+      try {
+        await supabase.auth.admin.updateUserById(id, {
+          user_metadata: { role: updates.role },
+        });
+      } catch (authSyncErr) {
+        console.warn("[Staff Update] Auth metadata sync warning:", authSyncErr);
+      }
     }
 
     await recordAuditLog({

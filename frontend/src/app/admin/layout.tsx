@@ -7,11 +7,11 @@ import AdminShell from "@/components/admin/AdminShell/AdminShell";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isLoginPage = pathname === "/admin/login";
+  const isPublicAdminPage = pathname === "/admin/login" || pathname === "/admin/reset-password";
 
   return (
     <AdminAuthProvider>
-      {isLoginPage ? children : <AdminShell>{children}</AdminShell>}
+      {isPublicAdminPage ? children : <AdminShell>{children}</AdminShell>}
     </AdminAuthProvider>
   );
 }

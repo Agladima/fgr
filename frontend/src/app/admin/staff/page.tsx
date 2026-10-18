@@ -7,6 +7,7 @@ import {
   UserPlus,
   X,
   AlertTriangle,
+  CheckCircle2,
 } from "lucide-react";
 
 interface StaffMember {
@@ -30,6 +31,12 @@ export default function StaffManagementPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [createdStaffInfo, setCreatedStaffInfo] = useState<{
+    email: string;
+    fullName: string;
+    password?: string;
+    emailDelivered?: boolean;
+  } | null>(null);
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -78,12 +85,25 @@ export default function StaffManagementPage() {
       const res = await fetch("/api/admin/staff", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          fullName: form.fullName,
+          email: form.email,
+          jobTitle: form.jobTitle,
+          password: form.password,
+          temporaryPassword: form.password,
+          role: form.role,
+        }),
       });
 
       const json = await res.json();
       if (res.ok && json.success) {
         setModalOpen(false);
+        setCreatedStaffInfo({
+          email: form.email,
+          fullName: form.fullName,
+          password: json.data?.provisionalPassword || form.password,
+          emailDelivered: json.data?.emailDelivered,
+        });
         setForm({ fullName: "", email: "", jobTitle: "", password: "", role: "admin" });
         fetchStaff();
       } else {
@@ -144,10 +164,15 @@ export default function StaffManagementPage() {
           prev.map((s) => (s.id === member.id ? { ...s, role: nextRole } : s))
         );
       } else {
-        alert("Failed to update role.");
+        const json = await res.json().catch(() => null);
+        alert(json?.message || "Failed to update role.");
+        // Re-fetch to reset select to current DB state
+        fetchStaff();
       }
     } catch (err) {
       console.error(err);
+      alert("Network error updating role.");
+      fetchStaff();
     }
   };
 
@@ -181,6 +206,47 @@ export default function StaffManagementPage() {
           </button>
         </div>
       </div>
+
+      {createdStaffInfo && (
+        <div
+          style={{
+            background: "#f0fdf4",
+            border: "1px solid #bbf7d0",
+            borderRadius: "8px",
+            padding: "16px 20px",
+            marginBottom: "20px",
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: "12px",
+          }}
+        >
+          <div style={{ display: "flex", gap: "12px" }}>
+            <CheckCircle2 size={20} color="#16a34a" style={{ flexShrink: 0, marginTop: 2 }} />
+            <div>
+              <strong style={{ color: "#166534", fontSize: "14px" }}>
+                Staff Account Successfully Provisioned for {createdStaffInfo.fullName}
+              </strong>
+              <p style={{ margin: "4px 0 0 0", color: "#15803d", fontSize: "13px", lineHeight: 1.5 }}>
+                {createdStaffInfo.emailDelivered
+                  ? `An onboarding email with login credentials and a direct password reset link was dispatched to ${createdStaffInfo.email}.`
+                  : `Account created for ${createdStaffInfo.email}. Temporary password: `}
+                {createdStaffInfo.password && (
+                  <code style={{ background: "#dcfce7", color: "#14532d", padding: "2px 8px", borderRadius: "4px", fontWeight: 700, marginLeft: 6 }}>
+                    {createdStaffInfo.password}
+                  </code>
+                )}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setCreatedStaffInfo(null)}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "#166534" }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       {error ? (
         <div
