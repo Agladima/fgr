@@ -31,9 +31,13 @@ interface AdminShellProps {
 }
 
 export default function AdminShell({ children }: AdminShellProps) {
-  const { user, logout, canAccess } = useAdminAuth();
+  const { user, loading, logout, canAccess } = useAdminAuth();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  if (loading || !user) {
+    return null;
+  }
 
   const navGroups = [
     {
