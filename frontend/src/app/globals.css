@@ -3,53 +3,54 @@
 :root {
   /* ============================================================
      1. BRAND COLOUR SYSTEM
-     Primary: Charcoal Blue (#202833)
-     Secondary: Pearl (#eae0c8)
+      Primary: Venice Blue (#16587b)
+      Secondary: Rock Blue (#84b3ce)
+      Highlight: Merino (#f5eedd)
      ============================================================ */
-  --color-primary: #202833;
-  --color-primary-dark: #151b22;
-  --color-primary-darker: #0d1117;
-  --color-primary-light: #2d3846;
-  --color-primary-lighter: #3f4e62;
-  --color-primary-surface: #f1f4f8;
-  --color-primary-subtle: #e2e8f0;
+    --color-primary: #16587b;
+    --color-primary-dark: #124766;
+    --color-primary-darker: #0b3043;
+    --color-primary-light: #2e759b;
+    --color-primary-lighter: #5b95b6;
+    --color-primary-surface: #eaf3f7;
+    --color-primary-subtle: #d3e5ed;
 
-  --color-secondary: #eae0c8;
-  --color-secondary-light: #f5efe1;
-  --color-secondary-lighter: #faf7f2;
-  --color-secondary-dark: #d6caa9;
-  --color-secondary-darker: #b3a480;
-  --color-secondary-contrast: #202833;
+    --color-secondary: #84b3ce;
+    --color-secondary-light: #a9ccdf;
+    --color-secondary-lighter: #dcecf3;
+    --color-secondary-dark: #5e93b2;
+    --color-secondary-darker: #3c7191;
+    --color-secondary-contrast: #0e3d58;
 
-  /* Accent Highlight (Warm Amber / Gold for micro accents) */
-  --color-accent: #c49a45;
-  --color-accent-light: #dfb867;
-  --color-accent-subtle: #fcf8ee;
+    /* Accent Highlight (Merino for warm micro accents) */
+    --color-accent: #f5eedd;
+    --color-accent-light: #fbf8f0;
+    --color-accent-subtle: #fffdf8;
 
   /* ============================================================
      2. NEUTRALS & SURFACES
      ============================================================ */
-  --color-bg-page: #f8fafc;
-  --color-bg-surface: #ffffff;
-  --color-bg-surface-elevated: #ffffff;
-  --color-bg-subtle: #f1f5f9;
-  --color-bg-card: #ffffff;
-  --color-bg-dark: #202833;
-  --color-bg-dark-surface: #18202b;
+  --color-bg-page: #fcfbf7;
+  --color-bg-surface: #fffefa;
+  --color-bg-surface-elevated: #fffefa;
+  --color-bg-subtle: #f4f1e8;
+  --color-bg-card: #fffefa;
+  --color-bg-dark: #16587b;
+  --color-bg-dark-surface: #124766;
 
-  --color-text-heading: #141b22;
-  --color-text-body: #334155;
-  --color-text-muted: #64748b;
-  --color-text-subtle: #94a3b8;
+  --color-text-heading: #123a52;
+  --color-text-body: #294b5f;
+  --color-text-muted: #587384;
+  --color-text-subtle: #7894a3;
   --color-text-inverse: #ffffff;
-  --color-text-inverse-muted: #cbd5e1;
-  --color-text-secondary: #202833;
+  --color-text-inverse-muted: #d6e6ed;
+  --color-text-secondary: #16587b;
 
-  --color-border-subtle: #f1f5f9;
-  --color-border-default: #e2e8f0;
-  --color-border-strong: #cbd5e1;
-  --color-border-primary: rgba(32, 40, 51, 0.15);
-  --color-border-secondary: #d6caa9;
+  --color-border-subtle: #eef2ed;
+  --color-border-default: #d9e6e9;
+  --color-border-strong: #b8d1dc;
+  --color-border-primary: rgba(22, 88, 123, 0.15);
+  --color-border-secondary: #a9ccdf;
 
   /* ============================================================
      3. FUNCTIONAL / FEEDBACK STATUSES
@@ -141,8 +142,8 @@
   --shadow-md: 0 4px 8px -2px rgba(16, 24, 40, 0.06), 0 2px 4px -2px rgba(16, 24, 40, 0.04);
   --shadow-lg: 0 12px 18px -4px rgba(16, 24, 40, 0.08), 0 4px 6px -2px rgba(16, 24, 40, 0.03);
   --shadow-xl: 0 20px 25px -5px rgba(16, 24, 40, 0.10), 0 8px 10px -6px rgba(16, 24, 40, 0.04);
-  --shadow-pearl: 0 8px 25px -4px rgba(234, 224, 200, 0.4);
-  --shadow-primary: 0 10px 25px -5px rgba(32, 40, 51, 0.35);
+  --shadow-pearl: 0 8px 25px -4px rgba(245, 238, 221, 0.4);
+  --shadow-primary: 0 10px 25px -5px rgba(22, 88, 123, 0.35);
 
   /* ============================================================
      8. TRANSITIONS & TIMING

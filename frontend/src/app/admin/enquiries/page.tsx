@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import styles from "../admin-common.module.css";
+import { useAdminNotification } from "@/lib/admin/notification-context";
 import {
   Search,
   Eye,
@@ -34,6 +35,7 @@ interface InternalNote {
 }
 
 export default function EnquiriesManagementPage() {
+  const { showError } = useAdminNotification();
   const [enquiries, setEnquiries] = useState<ContactEnquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -170,11 +172,11 @@ export default function EnquiriesManagementPage() {
         setNewNoteContent("");
         fetchNotes(selectedRecord.id);
       } else {
-        alert(json.message || "Failed to add note.");
+        showError(json.message || "Failed to add note.");
       }
     } catch (err) {
       console.error(err);
-      alert("Error adding note.");
+      showError("Error adding note.");
     } finally {
       setAddingNote(false);
     }

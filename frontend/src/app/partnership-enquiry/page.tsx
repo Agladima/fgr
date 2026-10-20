@@ -8,6 +8,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import FeedbackState from "@/components/ui/Feedback";
 import MotionSection from "@/components/animations/MotionSection";
 import { isValidEmail, isValidPhone, isNonEmpty } from "@/lib/validation";
+import { useAdminNotification } from "@/lib/admin/notification-context";
 import { ArrowUpRight, AlertCircle } from "lucide-react";
 
 interface PartnershipFormState {
@@ -35,6 +36,7 @@ const initialFormState: PartnershipFormState = {
 };
 
 export default function PartnershipEnquiryPage() {
+  const { showError } = useAdminNotification();
   const [formData, setFormData] = useState<PartnershipFormState>(initialFormState);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -151,6 +153,7 @@ export default function PartnershipEnquiryPage() {
 
     if (!validate()) {
       setSubmissionError("Please correct the highlighted fields before submitting.");
+      showError("Please correct the highlighted fields before submitting.");
       return;
     }
 
@@ -184,12 +187,14 @@ export default function PartnershipEnquiryPage() {
         setSubmissionError(
           result.error?.message || "Failed to submit partnership enquiry. Please try again."
         );
+        showError(result.error?.message || "Failed to submit partnership enquiry. Please try again.");
         return;
       }
 
       setSubmitted(true);
     } catch {
       setSubmissionError("A network error occurred. Please check your connection and try again.");
+      showError("A network error occurred. Please check your connection and try again.");
     } finally {
       setIsSubmitting(false);
     }

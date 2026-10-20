@@ -288,12 +288,7 @@ export default function AdminOverviewPage() {
 
       {/* Two Column Operational Tables */}
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))",
-          gap: "24px",
-          marginBottom: "24px",
-        }}
+        className={styles.dashboardTables}
       >
         {/* Recent Registrations Card */}
         <div className={styles.tableCard}>
@@ -319,7 +314,7 @@ export default function AdminOverviewPage() {
               style={{
                 fontSize: "12.5px",
                 fontWeight: 600,
-                color: "var(--color-primary, #202833)",
+                color: "var(--color-primary, #16587b)",
                 display: "flex",
                 alignItems: "center",
                 gap: "4px",
@@ -391,7 +386,7 @@ export default function AdminOverviewPage() {
               style={{
                 fontSize: "12.5px",
                 fontWeight: 600,
-                color: "var(--color-primary, #202833)",
+                color: "var(--color-primary, #16587b)",
                 display: "flex",
                 alignItems: "center",
                 gap: "4px",
@@ -517,44 +512,40 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        <div
-          style={{
-            background: "#ffffff",
-            border: "1px solid var(--color-border-default, #e2e8f0)",
-            borderRadius: "10px",
-            padding: "20px",
-          }}
-        >
-          <h4 style={{ margin: "0 0 12px 0", fontSize: "14px", fontWeight: 700, color: "#141b22" }}>
-            System Infrastructure
-          </h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ color: "#64748b" }}>PostgreSQL Database</span>
-              <span style={{ color: "#16a34a", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px" }}>
-                <CheckCircle2 size={14} /> Connected
-              </span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ color: "#64748b" }}>Row Level Security (RLS)</span>
-              <span style={{ color: "#16a34a", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px" }}>
-                <CheckCircle2 size={14} /> Active
-              </span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ color: "#64748b" }}>Email Notifications</span>
-              <span style={{ color: "#16a34a", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px" }}>
-                <CheckCircle2 size={14} /> Resend Configured
-              </span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ color: "#64748b" }}>Current Role</span>
-              <span style={{ textTransform: "capitalize", fontWeight: 700, color: "#141b22" }}>
-                {user?.role.replace("_", " ")}
-              </span>
+        {user?.role === "super_admin" && (
+          <div
+            style={{
+              background: "#ffffff",
+              border: "1px solid var(--color-border-default, #e2e8f0)",
+              borderRadius: "10px",
+              padding: "20px",
+            }}
+          >
+            <h4 style={{ margin: "0 0 12px 0", fontSize: "14px", fontWeight: 700, color: "#141b22" }}>
+              System Infrastructure
+            </h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ color: "#64748b" }}>PostgreSQL Database</span>
+                <span style={{ color: "#16a34a", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px" }}>
+                  <CheckCircle2 size={14} /> Connected
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ color: "#64748b" }}>Row Level Security (RLS)</span>
+                <span style={{ color: "#16a34a", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px" }}>
+                  <CheckCircle2 size={14} /> Active
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ color: "#64748b" }}>Email Notifications</span>
+                <span style={{ color: "#16a34a", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px" }}>
+                  <CheckCircle2 size={14} /> Resend Configured
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

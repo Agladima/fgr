@@ -1,8 +1,8 @@
 .headerSection {
   background: linear-gradient(145deg, var(--color-primary-darker) 0%, var(--color-primary) 70%, var(--color-primary-light) 100%);
   color: var(--color-text-inverse);
-  padding: 100px 0 80px;
-  border-bottom: 1px solid rgba(234, 224, 200, 0.2);
+  padding: 64px 0 52px;
+  border-bottom: 1px solid rgba(132, 179, 206, 0.2);
   position: relative;
   overflow: hidden;
 }
@@ -13,9 +13,58 @@
   right: -10%;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(234, 224, 200, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(132, 179, 206, 0.1) 0%, transparent 70%);
   border-radius: var(--radius-full);
   pointer-events: none;
+}
+
+.headerCard {
+  position: relative;
+  z-index: 1;
+}
+
+.headerCopy {
+  max-width: 1120px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.headerDescription {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+  text-align: center;
+}
+
+.headerDescriptionLine {
+  display: block;
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .headerDescriptionLine {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 899px) {
+  .headerImage {
+    border-top: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .headerCard {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 0;
+  }
+
+  .headerCopy {
+    padding: var(--space-10);
+  }
 }
 
 .section {
@@ -33,6 +82,19 @@
   grid-template-columns: 1fr;
   gap: var(--space-8);
   margin-top: var(--space-8);
+}
+
+.purposeAside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.purposeNote {
+  background: var(--color-primary-surface);
+  padding: var(--space-10);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-primary-subtle);
 }
 
 @media (min-width: 900px) {
@@ -141,16 +203,40 @@
 }
 
 .valueCard {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-lg);
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  min-height: 160px;
   padding: var(--space-6);
-  transition: all var(--transition-fast);
+  overflow: hidden;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.valueCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--color-secondary);
 }
 
 .valueCard:hover {
-  border-color: var(--color-secondary);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--color-secondary-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.valueIndex {
+  flex: 0 0 auto;
+  color: var(--color-primary);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-extrabold);
+  line-height: 1;
 }
 
 .valueTitle {
@@ -175,7 +261,7 @@
   text-align: center;
   max-width: 900px;
   margin: var(--space-12) auto 0;
-  border: 1px solid rgba(234, 224, 200, 0.25);
+  border: 1px solid rgba(132, 179, 206, 0.25);
 }
 
 .commitmentHeading {

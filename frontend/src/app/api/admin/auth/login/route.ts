@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     const serviceClient = getSupabaseServiceClient();
     const { data: profile, error: profileError } = await serviceClient
       .from("admin_profiles")
-      .select("id, email, full_name, role, is_active")
+      .select("id, email, full_name, job_title, role, is_active")
       .eq("id", userId)
       .single();
 
@@ -89,6 +89,7 @@ export async function POST(req: NextRequest) {
           id: profile.id,
           email: profile.email,
           fullName: profile.full_name,
+          jobTitle: profile.job_title,
           role: profile.role,
         },
         token,

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAdminAuth } from "@/lib/admin/auth-context";
 import styles from "./AdminShell.module.css";
@@ -23,6 +24,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import logoImage from "@/assets/images/fgr logo.jpeg";
 
 interface AdminShellProps {
   children: React.ReactNode;
@@ -32,37 +34,6 @@ export default function AdminShell({ children }: AdminShellProps) {
   const { user, logout, canAccess } = useAdminAuth();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const getRoleBadgeClass = (role: string) => {
-    switch (role) {
-      case "super_admin":
-        return styles.roleSuperAdmin;
-      case "admin":
-        return styles.roleAdmin;
-      case "training_officer":
-      case "partnerships_officer":
-        return styles.roleOfficer;
-      default:
-        return styles.roleContent;
-    }
-  };
-
-  const formatRoleLabel = (role: string) => {
-    switch (role) {
-      case "super_admin":
-        return "Super Admin";
-      case "admin":
-        return "Administrator";
-      case "training_officer":
-        return "Training Officer";
-      case "partnerships_officer":
-        return "Partnerships Officer";
-      case "content_manager":
-        return "Content Manager";
-      default:
-        return role;
-    }
-  };
 
   const navGroups = [
     {
@@ -123,7 +94,9 @@ export default function AdminShell({ children }: AdminShellProps) {
       >
         <div className={styles.sidebarHeader}>
           <div className={styles.brandWrap}>
-            <div className={styles.brandLogo}>FGR</div>
+            <div className={styles.brandLogo}>
+              <Image src={logoImage} alt="FGR" fill sizes="36px" />
+            </div>
             <div className={styles.brandText}>
               <span className={styles.brandTitle}>Career Center</span>
               <span className={styles.brandSub}>Operations CRM</span>
@@ -139,8 +112,8 @@ export default function AdminShell({ children }: AdminShellProps) {
             </div>
             <div className={styles.userInfo}>
               <div className={styles.userName}>{user.fullName || user.email}</div>
-              <span className={`${styles.roleBadge} ${getRoleBadgeClass(user.role)}`}>
-                {formatRoleLabel(user.role)}
+              <span className={styles.roleBadge}>
+                {user.jobTitle || "Staff Member"}
               </span>
             </div>
           </div>

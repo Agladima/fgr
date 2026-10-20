@@ -108,7 +108,7 @@ export default function AdminLoginPage() {
               </label>
               <Link
                 href="/admin/reset-password"
-                style={{ fontSize: "12px", color: "var(--color-accent, #c49a45)", textDecoration: "none" }}
+                style={{ fontSize: "12px", color: "var(--color-primary, #16587b)", textDecoration: "none" }}
               >
                 Forgot password?
               </Link>
@@ -150,7 +150,7 @@ export default function AdminLoginPage() {
 
         <div className={styles.footerNote}>
           <p style={{ margin: "0 0 6px 0", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-            <ShieldCheck size={14} color="var(--color-accent, #c49a45)" />
+            <ShieldCheck size={14} color="var(--color-primary, #16587b)" />
             <span>Restricted Access: Authorized FGR Staff Only</span>
           </p>
           <p style={{ margin: 0 }}>

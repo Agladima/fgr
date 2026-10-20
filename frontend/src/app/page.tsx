@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./page.module.css";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
@@ -7,6 +8,12 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import MotionSection from "@/components/animations/MotionSection";
 import { StaggerGroup, StaggerItem } from "@/components/animations/StaggerGroup";
 import { PRIMARY_CTAS, SITE_METADATA } from "@/lib/constants/navigation";
+import { getSupabasePublicClient, isSupabaseConfigured } from "@/lib/server/supabase";
+import heroImage from "@/assets/images/hero.jpg";
+import aboutImage from "@/assets/images/about.jpg";
+import news1Image from "@/assets/images/news1.jpg";
+import news2Image from "@/assets/images/news2.jpg";
+import news3Image from "@/assets/images/news3.jpg";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -20,7 +27,7 @@ import {
   Handshake,
 } from "lucide-react";
 
-export default function Home() {
+export default async function Home() {
   const lceApproach = [
     {
       pillar: "LEARN",
@@ -123,6 +130,8 @@ export default function Home() {
       description:
         "Applications are now open for technical, digital, and employability training programmes at FGR Career Development Center.",
       href: "/news-events",
+      image: news1Image,
+      imageAlt: "Facilitator leading an employability workshop",
     },
     {
       title: "Digital Skills & Innovation Bootcamps Announced",
@@ -131,6 +140,8 @@ export default function Home() {
       description:
         "Intensive training in graphic design, computer applications, digital marketing, and remote-work readiness.",
       href: "/news-events",
+      image: news2Image,
+      imageAlt: "Panel discussion at a workforce development event",
     },
     {
       title: "FGR Expands Institutional Partnership Network",
@@ -139,8 +150,40 @@ export default function Home() {
       description:
         "Collaborations established with private sector employers and development institutions to expand direct graduate placement.",
       href: "/news-events",
+      image: news3Image,
+      imageAlt: "Professional reviewing performance data on a laptop",
     },
   ];
+
+  let displayedNews = sampleNews;
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = getSupabasePublicClient();
+      const { data } = await supabase
+        .from("news_articles")
+        .select("title, category, summary, published_at, featured_image_url")
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
+        .limit(3);
+
+      if (data?.length) {
+        displayedNews = data.map((article, index) => ({
+          title: article.title,
+          category: article.category,
+          date: new Date(article.published_at).toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+          }),
+          description: article.summary,
+          href: "/news-events",
+          image: article.featured_image_url || [news1Image, news2Image, news3Image][index % 3],
+          imageAlt: `${article.title} news image`,
+        }));
+      }
+    } catch {
+      // Keep the curated fallback news when the public database is unavailable.
+    }
+  }
 
   return (
     <>
@@ -150,10 +193,20 @@ export default function Home() {
       <section className={styles.hero} aria-labelledby="hero-heading">
         <div className={styles.heroGlow} aria-hidden="true" />
         <div className={styles.heroGlowSecondary} aria-hidden="true" />
+        <div className={styles.heroMedia}>
+          <Image
+            src={heroImage}
+            alt="Career development workshop in progress"
+            fill
+            priority
+            sizes="100vw"
+          />
+        </div>
 
         <Container size="wide">
-          <MotionSection direction="up" duration={0.65} delay={0.05}>
-            <div className={styles.heroContent}>
+          <div className={styles.heroLayout}>
+            <MotionSection direction="up" duration={0.65} delay={0.05}>
+              <div className={styles.heroContent}>
               {/* Brand Tagline */}
               <div className={styles.heroTaglinePill}>
                 <span className={styles.heroTaglineDot} />
@@ -162,23 +215,27 @@ export default function Home() {
 
               {/* Headline */}
               <h1 id="hero-heading" className={styles.heroTitle}>
-                Equipping People with Skills. <br />
-                Connecting Them to Opportunities.
+                <span className={styles.heroTitleLine}>Equipping People with Skills.</span>
+                <span className={styles.heroTitleLine}>Connecting Them to Opportunities.</span>
               </h1>
 
               {/* Official Description */}
               <p className={styles.heroLead}>
-                <strong>FGR Career Development Center</strong> is a workforce-development
-                institution focused on equipping young people and adults with practical
-                skills, professional competencies and entrepreneurial capacity for
-                employment, enterprise and meaningful economic participation.
+                <span className={styles.heroLeadLine}>
+                  <strong>FGR Career Development Center</strong> is a workforce-development institution focused on equipping young people and adults with practical skills,
+                </span>
+                <span className={styles.heroLeadLine}>
+                  professional competencies and entrepreneurial capacity for employment, enterprise and meaningful economic participation.
+                </span>
               </p>
 
               <p className={styles.heroSubtext}>
-                We provide training, skills development, enterprise support, professional
-                development and project-related services while connecting individuals
-                and organisations with opportunities for growth, collaboration and
-                advancement.
+                <span className={styles.heroSubtextLine}>
+                  We provide training, skills development, enterprise support, professional development and project-related services
+                </span>
+                <span className={styles.heroSubtextLine}>
+                  while connecting individuals and organisations with opportunities for growth, collaboration and advancement.
+                </span>
               </p>
 
               {/* Prominent Action Buttons */}
@@ -202,8 +259,9 @@ export default function Home() {
                   {PRIMARY_CTAS.partner.label}
                 </Button>
               </div>
-            </div>
-          </MotionSection>
+              </div>
+            </MotionSection>
+          </div>
         </Container>
       </section>
 
@@ -270,9 +328,6 @@ export default function Home() {
                     and technical assistance to partners implementing development and
                     capacity-building initiatives.
                   </p>
-                </div>
-
-                <div>
                   <p className={styles.aboutParagraph}>
                     We work with individuals, businesses, institutions, government,
                     development organisations, professional bodies and other partners
@@ -290,6 +345,14 @@ export default function Home() {
                       Learn More About Us
                     </Button>
                   </div>
+                </div>
+                <div className={styles.aboutMedia}>
+                  <Image
+                    src={aboutImage}
+                    alt="Career coaching conversation between two professionals"
+                    fill
+                    sizes="(max-width: 767px) 100vw, 50vw"
+                  />
                 </div>
               </div>
             </div>
@@ -417,19 +480,24 @@ export default function Home() {
           </MotionSection>
 
           <StaggerGroup className={styles.newsGrid} staggerDelay={0.1}>
-            {sampleNews.map((news) => (
+            {displayedNews.map((news) => (
               <StaggerItem key={news.title}>
                 <article className={styles.newsCard}>
-                  <div className={styles.newsMeta}>
-                    <span className={styles.newsCategory}>{news.category}</span>
-                    <span>{news.date}</span>
+                  <div className={styles.newsImage}>
+                    <Image src={news.image} alt={news.imageAlt} fill sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw" />
                   </div>
-                  <h3 className={styles.newsTitle}>{news.title}</h3>
-                  <p className={styles.newsExcerpt}>{news.description}</p>
-                  <Link href={news.href} className={styles.newsLink}>
-                    <span>Read update</span>
-                    <ArrowRight size={14} />
-                  </Link>
+                  <div className={styles.newsOverlay}>
+                    <div className={styles.newsMeta}>
+                      <span className={styles.newsCategory}>{news.category}</span>
+                      <span>{news.date}</span>
+                    </div>
+                    <h3 className={styles.newsTitle}>{news.title}</h3>
+                    <p className={styles.newsExcerpt}>{news.description}</p>
+                    <Link href={news.href} className={styles.newsLink}>
+                      <span>Read update</span>
+                      <ArrowRight size={14} />
+                    </Link>
+                  </div>
                 </article>
               </StaggerItem>
             ))}

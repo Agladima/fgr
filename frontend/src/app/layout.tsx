@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/navigation/Header";
 import Footer from "@/components/layout/Footer";
+import { AdminNotificationProvider } from "@/lib/admin/notification-context";
 
 // Load user-supplied fonts locally with next/font/local
 const inter = localFont({
@@ -54,6 +56,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const instant = false;
+
 export default function RootLayout({
   children,
 }: {
@@ -65,11 +69,15 @@ export default function RootLayout({
       className={`${inter.variable} ${plusJakartaSans.variable}`}
     >
       <body>
-        <Header />
-        <main id="main-content" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          {children}
-        </main>
-        <Footer />
+        <Suspense fallback={null}>
+          <AdminNotificationProvider>
+            <Header />
+            <main id="main-content" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              {children}
+            </main>
+            <Footer />
+          </AdminNotificationProvider>
+        </Suspense>
       </body>
     </html>
   );

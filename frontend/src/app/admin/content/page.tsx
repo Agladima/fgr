@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import styles from "../admin-common.module.css";
+import { useAdminNotification } from "@/lib/admin/notification-context";
 import {
   FileText,
   Download,
@@ -20,8 +21,9 @@ interface NewsItem {
   title: string;
   slug: string;
   category: string;
-  excerpt: string;
+  summary: string;
   author: string;
+  featured_image_url?: string | null;
   status: "draft" | "published" | "archived";
   published_at?: string;
   created_at: string;
@@ -57,6 +59,7 @@ interface SuccessStoryItem {
 }
 
 export default function ContentManagementPage() {
+  const { showError } = useAdminNotification();
   const [activeTab, setActiveTab] = useState<ContentTab>("news");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,13 +74,15 @@ export default function ContentManagementPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [newsImageFile, setNewsImageFile] = useState<File | null>(null);
 
   // Form states
   const [newsForm, setNewsForm] = useState({
     title: "",
     slug: "",
     category: "Announcement",
-    excerpt: "",
+    summary: "",
+    featured_image_url: "",
     author: "FGR Communications",
     status: "published" as "draft" | "published" | "archived",
   });
@@ -137,12 +142,14 @@ export default function ContentManagementPage() {
   // Open Create Modal
   const handleOpenCreate = () => {
     setEditingId(null);
+    setNewsImageFile(null);
     if (activeTab === "news") {
       setNewsForm({
         title: "",
         slug: "",
         category: "Announcement",
-        excerpt: "",
+        summary: "",
+        featured_image_url: "",
         author: "FGR Communications",
         status: "published",
       });
@@ -186,7 +193,29 @@ export default function ContentManagementPage() {
       const method = editingId ? "PATCH" : "POST";
 
       let body = {};
-      if (activeTab === "news") body = newsForm;
+      if (activeTab === "news") {
+        if (!newsForm.featured_image_url.trim() && !newsImageFile) {
+          showError("Add an image URL or upload an image before saving the article.");
+          return;
+        }
+
+        let imageUrl = newsForm.featured_image_url.trim();
+        if (newsImageFile) {
+          const uploadData = new FormData();
+          uploadData.append("file", newsImageFile);
+          const uploadResponse = await fetch("/api/admin/media/upload", {
+            method: "POST",
+            body: uploadData,
+          });
+          const uploadJson = await uploadResponse.json();
+          if (!uploadResponse.ok || !uploadJson.success) {
+            throw new Error(uploadJson.message || "Failed to upload image.");
+          }
+          imageUrl = uploadJson.data.url;
+        }
+
+        body = { ...newsForm, featured_image_url: imageUrl };
+      }
       if (activeTab === "resources") body = resourceForm;
       if (activeTab === "impact") body = impactForm;
       if (activeTab === "stories") body = storyForm;
@@ -202,10 +231,10 @@ export default function ContentManagementPage() {
         setModalOpen(false);
         fetchTabData(activeTab);
       } else {
-        alert(json.message || "Failed to save record.");
+        showError(json.message || "Failed to save record.");
       }
     } catch {
-      alert("Error saving record.");
+      showError("Error saving record.");
     } finally {
       setSaving(false);
     }
@@ -222,10 +251,10 @@ export default function ContentManagementPage() {
       if (res.ok) {
         fetchTabData(activeTab);
       } else {
-        alert("Failed to delete record.");
+        showError("Failed to delete record.");
       }
     } catch {
-      alert("Error deleting record.");
+      showError("Error deleting record.");
     }
   };
 
@@ -267,8 +296,8 @@ export default function ContentManagementPage() {
             background: "none",
             fontSize: "13.5px",
             fontWeight: activeTab === "news" ? 700 : 500,
-            color: activeTab === "news" ? "var(--color-primary, #202833)" : "#64748b",
-            borderBottom: activeTab === "news" ? "2px solid var(--color-primary, #202833)" : "2px solid transparent",
+            color: activeTab === "news" ? "var(--color-primary, #16587b)" : "#64748b",
+            borderBottom: activeTab === "news" ? "2px solid var(--color-primary, #16587b)" : "2px solid transparent",
             cursor: "pointer",
           }}
         >
@@ -286,8 +315,8 @@ export default function ContentManagementPage() {
             background: "none",
             fontSize: "13.5px",
             fontWeight: activeTab === "resources" ? 700 : 500,
-            color: activeTab === "resources" ? "var(--color-primary, #202833)" : "#64748b",
-            borderBottom: activeTab === "resources" ? "2px solid var(--color-primary, #202833)" : "2px solid transparent",
+            color: activeTab === "resources" ? "var(--color-primary, #16587b)" : "#64748b",
+            borderBottom: activeTab === "resources" ? "2px solid var(--color-primary, #16587b)" : "2px solid transparent",
             cursor: "pointer",
           }}
         >
@@ -305,8 +334,8 @@ export default function ContentManagementPage() {
             background: "none",
             fontSize: "13.5px",
             fontWeight: activeTab === "impact" ? 700 : 500,
-            color: activeTab === "impact" ? "var(--color-primary, #202833)" : "#64748b",
-            borderBottom: activeTab === "impact" ? "2px solid var(--color-primary, #202833)" : "2px solid transparent",
+            color: activeTab === "impact" ? "var(--color-primary, #16587b)" : "#64748b",
+            borderBottom: activeTab === "impact" ? "2px solid var(--color-primary, #16587b)" : "2px solid transparent",
             cursor: "pointer",
           }}
         >
@@ -324,8 +353,8 @@ export default function ContentManagementPage() {
             background: "none",
             fontSize: "13.5px",
             fontWeight: activeTab === "stories" ? 700 : 500,
-            color: activeTab === "stories" ? "var(--color-primary, #202833)" : "#64748b",
-            borderBottom: activeTab === "stories" ? "2px solid var(--color-primary, #202833)" : "2px solid transparent",
+            color: activeTab === "stories" ? "var(--color-primary, #16587b)" : "#64748b",
+            borderBottom: activeTab === "stories" ? "2px solid var(--color-primary, #16587b)" : "2px solid transparent",
             cursor: "pointer",
           }}
         >
@@ -683,27 +712,55 @@ export default function ContentManagementPage() {
                   </div>
                   <div>
                     <label style={{ fontSize: "12.5px", fontWeight: 600, color: "#334155", display: "block", marginBottom: "4px" }}>
-                      URL Slug *
+                      Featured Image URL *
+                    </label>
+                    <input
+                      type="text"
+                      className={styles.searchInput}
+                      style={{ paddingLeft: "12px" }}
+                      placeholder="/images/news-update.jpg or https://..."
+                      value={newsForm.featured_image_url}
+                      onChange={(e) => setNewsForm({ ...newsForm, featured_image_url: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: "12.5px", fontWeight: 600, color: "#334155", display: "block", marginBottom: "4px" }}>
+                      Or Upload Image
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={(e) => setNewsImageFile(e.target.files?.[0] || null)}
+                      style={{ width: "100%", fontSize: "13px" }}
+                    />
+                    <span style={{ display: "block", marginTop: "5px", fontSize: "12px", color: "#64748b" }}>
+                      JPG, PNG, or WebP up to 5 MB. Upload takes priority over the URL.
+                    </span>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: "12.5px", fontWeight: 600, color: "#334155", display: "block", marginBottom: "4px" }}>
+                      Category *
                     </label>
                     <input
                       type="text"
                       required
                       className={styles.searchInput}
                       style={{ paddingLeft: "12px" }}
-                      value={newsForm.slug}
-                      onChange={(e) => setNewsForm({ ...newsForm, slug: e.target.value })}
+                      value={newsForm.category}
+                      onChange={(e) => setNewsForm({ ...newsForm, category: e.target.value })}
                     />
                   </div>
                   <div>
                     <label style={{ fontSize: "12.5px", fontWeight: 600, color: "#334155", display: "block", marginBottom: "4px" }}>
-                      Excerpt / Summary
+                      Summary / Card Description *
                     </label>
                     <textarea
                       rows={3}
+                      required
                       className={styles.searchInput}
                       style={{ paddingLeft: "12px", height: "auto" }}
-                      value={newsForm.excerpt}
-                      onChange={(e) => setNewsForm({ ...newsForm, excerpt: e.target.value })}
+                      value={newsForm.summary}
+                      onChange={(e) => setNewsForm({ ...newsForm, summary: e.target.value })}
                     />
                   </div>
                 </>

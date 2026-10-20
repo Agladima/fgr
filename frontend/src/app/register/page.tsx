@@ -8,6 +8,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import FeedbackState from "@/components/ui/Feedback";
 import MotionSection from "@/components/animations/MotionSection";
 import { isValidEmail, isValidPhone, isNonEmpty } from "@/lib/validation";
+import { useAdminNotification } from "@/lib/admin/notification-context";
 import { ArrowUpRight, AlertCircle } from "lucide-react";
 
 interface FormState {
@@ -43,6 +44,7 @@ const initialFormState: FormState = {
 };
 
 export default function RegisterPage() {
+  const { showError } = useAdminNotification();
   const [formData, setFormData] = useState<FormState>(initialFormState);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -122,6 +124,7 @@ export default function RegisterPage() {
 
     if (!validate()) {
       setSubmissionError("Please review the highlighted fields below and correct the errors.");
+      showError("Please review the highlighted fields below and correct the errors.");
       return;
     }
 
@@ -152,12 +155,14 @@ export default function RegisterPage() {
         setSubmissionError(
           result.error?.message || "Failed to submit registration. Please try again."
         );
+        showError(result.error?.message || "Failed to submit registration. Please try again.");
         return;
       }
 
       setSubmitted(true);
     } catch {
       setSubmissionError("A network error occurred. Please check your connection and try again.");
+      showError("A network error occurred. Please check your connection and try again.");
     } finally {
       setIsSubmitting(false);
     }

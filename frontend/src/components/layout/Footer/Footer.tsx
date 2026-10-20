@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import styles from "./Footer.module.css";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import { MAIN_NAV_ITEMS, PRIMARY_CTAS, SITE_METADATA } from "@/lib/constants/navigation";
+import logoImage from "@/assets/images/fgr logo.jpeg";
 import {
   Mail,
   Phone,
@@ -121,7 +123,7 @@ export const Footer: React.FC = () => {
             <div className={styles.orgColumn}>
               <div className={styles.logoGroup}>
                 <div className={styles.logoMark}>
-                  <span>FGR</span>
+                  <Image src={logoImage} alt="FGR" fill sizes="44px" />
                 </div>
                 <div className={styles.logoText}>
                   <span className={styles.logoTitle}>CAREER DEVELOPMENT</span>

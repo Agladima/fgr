@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import styles from "../admin-common.module.css";
+import { useAdminNotification } from "@/lib/admin/notification-context";
 import {
   Plus,
   Calendar,
@@ -33,6 +34,7 @@ interface FollowUpTask {
 }
 
 export default function FollowUpsPage() {
+  const { showError } = useAdminNotification();
   const [tasks, setTasks] = useState<FollowUpTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -130,10 +132,10 @@ export default function FollowUpsPage() {
         });
         fetchTasks();
       } else {
-        alert(json.message || "Failed to create task.");
+        showError(json.message || "Failed to create task.");
       }
     } catch {
-      alert("Error creating task.");
+      showError("Error creating task.");
     } finally {
       setCreating(false);
     }
@@ -331,7 +333,7 @@ export default function FollowUpsPage() {
                         width: "18px",
                         height: "18px",
                         cursor: "pointer",
-                        accentColor: "var(--color-primary, #202833)",
+                        accentColor: "var(--color-primary, #16587b)",
                       }}
                       title={isCompleted ? "Mark pending" : "Mark completed"}
                     />

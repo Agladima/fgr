@@ -51,17 +51,24 @@ export default function AboutPage() {
         <div className={styles.headerGlow} aria-hidden="true" />
         <Container size="wide">
           <MotionSection direction="up" duration={0.6} delay={0.05}>
-            <SectionHeading
-              eyebrow="ABOUT FGR CAREER DEVELOPMENT CENTER"
-              title="Who We Are"
-              theme="dark"
-              align="left"
-            />
-            <p style={{ fontSize: "1.125rem", color: "rgba(255, 255, 255, 0.9)", maxWidth: "800px", lineHeight: "1.7" }}>
-              FGR Career Development Center is a workforce-development institution
-              with established competencies in training, skills development,
-              entrepreneurship, professional development and programme implementation.
-            </p>
+            <div className={styles.headerCard}>
+              <div className={styles.headerCopy}>
+                <SectionHeading
+                  eyebrow="ABOUT FGR CAREER DEVELOPMENT CENTER"
+                  title="Who We Are"
+                  theme="dark"
+                  align="center"
+                />
+                <p className={styles.headerDescription}>
+                  <span className={styles.headerDescriptionLine}>
+                    FGR Career Development Center is a workforce-development institution with established competencies in training,
+                  </span>
+                  <span className={styles.headerDescriptionLine}>
+                    skills development, entrepreneurship, professional development and programme implementation.
+                  </span>
+                </p>
+              </div>
+            </div>
           </MotionSection>
         </Container>
       </section>
@@ -95,20 +102,22 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              <div style={{ background: "var(--color-primary-surface)", padding: "2.5rem", borderRadius: "var(--radius-xl)", border: "1px solid var(--color-primary-subtle)" }}>
-                <h3 style={{ fontSize: "1.25rem", fontWeight: "700", color: "var(--color-primary)", marginBottom: "1rem" }}>
-                  Beyond Traditional Training
-                </h3>
-                <p style={{ fontSize: "0.9375rem", color: "var(--color-text-body)", lineHeight: "1.7", marginBottom: "1rem" }}>
-                  The Centre also provides project management, organisational support
-                  and technical assistance to partners implementing development and
-                  capacity-building initiatives.
-                </p>
-                <p style={{ fontSize: "0.9375rem", color: "var(--color-text-body)", lineHeight: "1.7" }}>
-                  We believe that effective workforce development goes beyond training.
-                  It requires relevant skills, practical experience, professional
-                  competencies, access to networks and meaningful connections to opportunity.
-                </p>
+              <div className={styles.purposeAside}>
+                <div className={styles.purposeNote}>
+                  <h3 style={{ fontSize: "1.25rem", fontWeight: "700", color: "var(--color-primary)", marginBottom: "1rem" }}>
+                    Beyond Traditional Training
+                  </h3>
+                  <p style={{ fontSize: "0.9375rem", color: "var(--color-text-body)", lineHeight: "1.7", marginBottom: "1rem" }}>
+                    The Centre also provides project management, organisational support
+                    and technical assistance to partners implementing development and
+                    capacity-building initiatives.
+                  </p>
+                  <p style={{ fontSize: "0.9375rem", color: "var(--color-text-body)", lineHeight: "1.7" }}>
+                    We believe that effective workforce development goes beyond training.
+                    It requires relevant skills, practical experience, professional
+                    competencies, access to networks and meaningful connections to opportunity.
+                  </p>
+                </div>
               </div>
             </div>
           </MotionSection>
@@ -195,10 +204,13 @@ export default function AboutPage() {
           </MotionSection>
 
           <StaggerGroup className={styles.valuesGrid} staggerDelay={0.07}>
-            {values.map((v) => (
+            {values.map((v, index) => (
               <StaggerItem key={v.title} className={styles.valueCard}>
-                <h3 className={styles.valueTitle}>{v.title}</h3>
-                <p className={styles.valueDesc}>{v.description}</p>
+                <div className={styles.valueIndex}>{String(index + 1).padStart(2, "0")}</div>
+                <div>
+                  <h3 className={styles.valueTitle}>{v.title}</h3>
+                  <p className={styles.valueDesc}>{v.description}</p>
+                </div>
               </StaggerItem>
             ))}
           </StaggerGroup>

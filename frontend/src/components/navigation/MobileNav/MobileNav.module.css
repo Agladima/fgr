@@ -35,6 +35,8 @@
 }
 
 .logoMark {
+  position: relative;
+  overflow: hidden;
   width: 38px;
   height: 38px;
   border-radius: var(--radius-md);
@@ -47,6 +49,10 @@
   font-family: var(--font-family-heading);
   font-weight: var(--font-weight-extrabold);
   font-size: 0.875rem;
+}
+
+.logoMark img {
+  object-fit: cover;
 }
 
 .brandInfo {

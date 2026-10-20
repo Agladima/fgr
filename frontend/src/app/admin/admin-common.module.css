@@ -113,9 +113,9 @@
 
 .searchInput:focus {
   outline: none;
-  border-color: var(--color-primary, #202833);
+  border-color: var(--color-primary, #16587b);
   background-color: #ffffff;
-  box-shadow: 0 0 0 2px rgba(32, 40, 51, 0.08);
+  box-shadow: 0 0 0 2px rgba(22, 88, 123, 0.08);
 }
 
 .filterControls {
@@ -138,7 +138,7 @@
 
 .selectInput:focus {
   outline: none;
-  border-color: var(--color-primary, #202833);
+  border-color: var(--color-primary, #16587b);
 }
 
 /* Standard Buttons */
@@ -151,7 +151,7 @@
   font-weight: 600;
   border-radius: 6px;
   border: none;
-  background-color: var(--color-primary, #202833);
+  background-color: var(--color-primary, #16587b);
   color: #ffffff;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -159,7 +159,7 @@
 }
 
 .btnPrimary:hover {
-  background-color: var(--color-primary-dark, #151b22);
+  background-color: var(--color-primary-dark, #124766);
 }
 
 .btnSecondary {
@@ -180,7 +180,7 @@
 
 .btnSecondary:hover {
   background-color: var(--color-bg-subtle, #f1f5f9);
-  color: var(--color-primary, #202833);
+  color: var(--color-primary, #16587b);
 }
 
 .btnDanger {
@@ -211,6 +211,13 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
+.dashboardTables {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
 .tableResponsive {
   width: 100%;
   overflow-x: auto;
@@ -219,8 +226,44 @@
 .table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   text-align: left;
   font-size: 13.5px;
+}
+
+.staffTable th:nth-child(1),
+.staffTable td:nth-child(1) {
+  width: 17%;
+}
+
+.staffTable th:nth-child(2),
+.staffTable td:nth-child(2) {
+  width: 17%;
+}
+
+.staffTable th:nth-child(3),
+.staffTable td:nth-child(3) {
+  width: 25%;
+}
+
+.staffTable th:nth-child(4),
+.staffTable td:nth-child(4) {
+  width: 17%;
+}
+
+.staffTable th:nth-child(5),
+.staffTable td:nth-child(5) {
+  width: 9%;
+}
+
+.staffTable th:nth-child(6),
+.staffTable td:nth-child(6) {
+  width: 15%;
+  white-space: nowrap;
+}
+
+.staffTable td:nth-child(6) button {
+  white-space: nowrap;
 }
 
 .table th {
@@ -239,6 +282,7 @@
   border-bottom: 1px solid var(--color-border-default, #e2e8f0);
   color: var(--color-text-body, #334155);
   vertical-align: middle;
+  overflow-wrap: anywhere;
 }
 
 .table tbody tr:hover {
@@ -247,6 +291,26 @@
 
 .table tbody tr:last-child td {
   border-bottom: none;
+}
+
+@media (max-width: 900px) {
+  .dashboardTables {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboardTables .table th,
+  .dashboardTables .table td {
+    padding: 11px 12px;
+  }
+
+  .dashboardTables .table th:nth-child(2),
+  .dashboardTables .table td:nth-child(2),
+  .dashboardTables .table th:nth-child(4),
+  .dashboardTables .table td:nth-child(4) {
+    display: none;
+  }
 }
 
 /* Status Badges */

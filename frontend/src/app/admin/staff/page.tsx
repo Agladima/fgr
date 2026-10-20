@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useAdminAuth } from "@/lib/admin/auth-context";
 import styles from "../admin-common.module.css";
+import { useAdminNotification } from "@/lib/admin/notification-context";
 import {
   UserPlus,
   X,
@@ -17,11 +18,11 @@ interface StaffMember {
   job_title?: string;
   role: "super_admin" | "admin" | "training_officer" | "partnerships_officer" | "content_manager";
   is_active: boolean;
-  last_login_at?: string;
   created_at: string;
 }
 
 export default function StaffManagementPage() {
+  const { showError } = useAdminNotification();
   const { user } = useAdminAuth();
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,7 +119,7 @@ export default function StaffManagementPage() {
 
   const handleToggleActive = async (member: StaffMember) => {
     if (member.id === user?.id) {
-      alert("Security policy: You cannot deactivate your own account.");
+      showError("Security policy: You cannot deactivate your own account.");
       return;
     }
 
@@ -139,16 +140,16 @@ export default function StaffManagementPage() {
         );
       } else {
         const json = await res.json();
-        alert(json.message || "Failed to update staff status.");
+        showError(json.message || "Failed to update staff status.");
       }
     } catch {
-      alert("Error updating status.");
+      showError("Error updating status.");
     }
   };
 
   const handleChangeRole = async (member: StaffMember, nextRole: StaffMember["role"]) => {
     if (member.id === user?.id) {
-      alert("You cannot change your own role.");
+      showError("You cannot change your own role.");
       return;
     }
 
@@ -165,28 +166,14 @@ export default function StaffManagementPage() {
         );
       } else {
         const json = await res.json().catch(() => null);
-        alert(json?.message || "Failed to update role.");
+        showError(json?.message || "Failed to update role.");
         // Re-fetch to reset select to current DB state
         fetchStaff();
       }
     } catch (err) {
       console.error(err);
-      alert("Network error updating role.");
+      showError("Network error updating role.");
       fetchStaff();
-    }
-  };
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "Never logged in";
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-    } catch {
-      return dateStr;
     }
   };
 
@@ -269,7 +256,7 @@ export default function StaffManagementPage() {
       ) : (
         <div className={styles.tableCard}>
           <div className={styles.tableResponsive}>
-            <table className={styles.table}>
+            <table className={`${styles.table} ${styles.staffTable}`}>
               <thead>
                 <tr>
                   <th>Staff Member</th>
@@ -277,14 +264,13 @@ export default function StaffManagementPage() {
                   <th>Email</th>
                   <th>Permission Level</th>
                   <th>Status</th>
-                  <th>Last Login</th>
                   <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
+                    <td colSpan={6} style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
                       Loading staff accounts...
                     </td>
                   </tr>
@@ -333,9 +319,6 @@ export default function StaffManagementPage() {
                             <span className={styles.badgeDot} /> Deactivated
                           </span>
                         )}
-                      </td>
-                      <td style={{ fontSize: "12px", color: "#64748b" }}>
-                        {formatDate(m.last_login_at)}
                       </td>
                       <td style={{ textAlign: "right" }}>
                         {m.id !== user?.id && (

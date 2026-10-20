@@ -48,7 +48,7 @@
 
 /* VARIANTS */
 
-/* Primary: Charcoal Blue (#202833) with Pearl / White text */
+/* Primary: Venice Blue with Rock Blue / white text */
 .primary {
   background-color: var(--color-primary);
   color: var(--color-text-inverse);
@@ -68,7 +68,7 @@
   transform: translateY(0);
 }
 
-/* Secondary: Pearl (#eae0c8) with Charcoal Blue text */
+/* Secondary: Rock Blue with Venice Blue text */
 .secondary {
   background-color: var(--color-secondary);
   color: var(--color-secondary-contrast);

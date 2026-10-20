@@ -8,7 +8,7 @@
 /* Sidebar Styles */
 .sidebar {
   width: 270px;
-  background-color: var(--color-primary-dark, #151b22);
+  background-color: var(--color-primary-dark, #124766);
   color: #f1f5f9;
   display: flex;
   flex-direction: column;
@@ -34,11 +34,13 @@
 }
 
 .brandLogo {
+  position: relative;
+  overflow: hidden;
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #c49a45 0%, #dfb867 100%);
-  color: #151b22;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-light) 100%);
+  color: var(--color-secondary-contrast);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -46,6 +48,10 @@
   font-size: 16px;
   letter-spacing: -0.05em;
   flex-shrink: 0;
+}
+
+.brandLogo img {
+  object-fit: cover;
 }
 
 .brandText {
@@ -64,7 +70,7 @@
 .brandSub {
   font-size: 11px;
   font-weight: 600;
-  color: var(--color-accent, #c49a45);
+  color: var(--color-accent, #f5eedd);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -84,7 +90,7 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: var(--color-primary-light, #2d3846);
+  background: var(--color-primary-light, #2e759b);
   color: #ffffff;
   font-size: 13px;
   font-weight: 700;
@@ -121,7 +127,7 @@
 
 .roleSuperAdmin {
   background-color: rgba(196, 154, 69, 0.2);
-  color: #dfb867;
+  color: var(--color-secondary-light);
 }
 
 .roleAdmin {
@@ -189,9 +195,9 @@
 
 .navItemActive {
   background-color: rgba(196, 154, 69, 0.15);
-  color: #f5efe1;
+  color: #dcecf3;
   font-weight: 700;
-  border-left: 3px solid var(--color-accent, #c49a45);
+  border-left: 3px solid var(--color-accent, #f5eedd);
 }
 
 .navItemActive:hover {

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import styles from "../admin-common.module.css";
+import { useAdminNotification } from "@/lib/admin/notification-context";
 import {
   Plus,
   Edit2,
@@ -24,6 +25,7 @@ interface Programme {
 }
 
 export default function ProgrammesManagementPage() {
+  const { showError } = useAdminNotification();
   const [programmes, setProgrammes] = useState<Programme[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +106,7 @@ export default function ProgrammesManagementPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title || !form.slug || !form.summary) {
-      alert("Please fill in Title, Slug, and Summary.");
+      showError("Please fill in Title, Slug, and Summary.");
       return;
     }
 
@@ -126,7 +128,7 @@ export default function ProgrammesManagementPage() {
         setModalOpen(false);
         fetchProgrammes();
       } else {
-        alert(json.message || "Failed to save programme.");
+        showError(json.message || "Failed to save programme.");
       }
     } catch {
     } finally {
@@ -145,7 +147,7 @@ export default function ProgrammesManagementPage() {
       if (res.ok) {
         setProgrammes((prev) => prev.filter((item) => item.id !== p.id));
       } else {
-        alert("Failed to delete programme.");
+        showError("Failed to delete programme.");
       }
     } catch {
     }

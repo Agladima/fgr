@@ -212,7 +212,7 @@ export default function AdminResetPasswordPage() {
               href="/admin/login"
               style={{
                 fontSize: "13.5px",
-                color: "#c49a45",
+                color: "var(--color-primary, #16587b)",
                 fontWeight: 600,
                 textDecoration: "none",
                 display: "inline-flex",
@@ -339,7 +339,7 @@ export default function AdminResetPasswordPage() {
 
         <div className={styles.footerNote}>
           <p style={{ margin: "0 0 6px 0", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-            <ShieldCheck size={14} color="var(--color-accent, #c49a45)" />
+            <ShieldCheck size={14} color="var(--color-primary, #16587b)" />
             <span>Encrypted internal staff access</span>
           </p>
           <p style={{ margin: 0 }}>

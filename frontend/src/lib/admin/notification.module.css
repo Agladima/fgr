@@ -1,0 +1,70 @@
+.popup {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 2000;
+  width: min(390px, calc(100vw - 32px));
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--color-error-border);
+  border-left: 4px solid var(--color-error);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-xl);
+  color: var(--color-text-body);
+  animation: notificationIn 180ms ease-out;
+}
+
+.icon {
+  flex: 0 0 auto;
+  color: var(--color-error);
+  margin-top: 1px;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--color-text-heading);
+  font-size: var(--font-size-sm);
+}
+
+.content p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  overflow-wrap: anywhere;
+}
+
+.close {
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding: 2px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.close:hover {
+  color: var(--color-error);
+}
+
+@keyframes notificationIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  .popup {
+    top: 12px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+}

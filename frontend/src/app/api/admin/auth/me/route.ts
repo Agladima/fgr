@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
       id: auth.userId,
       email: auth.email,
       fullName: auth.fullName,
+      jobTitle: auth.jobTitle,
       role: auth.role,
     },
   });

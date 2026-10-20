@@ -242,6 +242,7 @@ export interface AdminAuthResult {
   userId?: string;
   email?: string;
   fullName?: string;
+  jobTitle?: string;
   role?: string;
   error?: string;
 }
@@ -309,7 +310,7 @@ export async function authenticateAdmin(req: NextRequest): Promise<AdminAuthResu
     const serviceClient = getSupabaseServiceClient();
     const { data: profile, error: profileError } = await serviceClient
       .from("admin_profiles")
-      .select("id, email, full_name, role, is_active")
+      .select("id, email, full_name, job_title, role, is_active")
       .eq("id", userId)
       .eq("is_active", true)
       .single();
@@ -326,6 +327,7 @@ export async function authenticateAdmin(req: NextRequest): Promise<AdminAuthResu
       userId: profile.id,
       email: profile.email,
       fullName: profile.full_name,
+      jobTitle: profile.job_title,
       role: profile.role,
     };
   } catch (err) {

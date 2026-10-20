@@ -8,6 +8,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import FeedbackState from "@/components/ui/Feedback";
 import MotionSection from "@/components/animations/MotionSection";
 import { isValidEmail, isValidPhone, isNonEmpty } from "@/lib/validation";
+import { useAdminNotification } from "@/lib/admin/notification-context";
 import { PRIMARY_CTAS } from "@/lib/constants/navigation";
 import { MapPin, Phone, Mail, Globe, ArrowUpRight, Send, AlertCircle } from "lucide-react";
 
@@ -32,6 +33,7 @@ const initialFormState: ContactFormState = {
 };
 
 export default function ContactPage() {
+  const { showError } = useAdminNotification();
   const [formData, setFormData] = useState<ContactFormState>(initialFormState);
   const [interests, setInterests] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -115,6 +117,7 @@ export default function ContactPage() {
 
     if (!validate()) {
       setSubmissionError("Please review the highlighted fields below.");
+      showError("Please review the highlighted fields below.");
       return;
     }
 
@@ -148,12 +151,14 @@ export default function ContactPage() {
         setSubmissionError(
           result.error?.message || "Failed to submit enquiry. Please try again."
         );
+        showError(result.error?.message || "Failed to submit enquiry. Please try again.");
         return;
       }
 
       setSubmitted(true);
     } catch {
       setSubmissionError("A network error occurred. Please check your connection and try again.");
+      showError("A network error occurred. Please check your connection and try again.");
     } finally {
       setIsSubmitting(false);
     }

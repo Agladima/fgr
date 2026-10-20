@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import styles from "../admin-common.module.css";
+import { useAdminNotification } from "@/lib/admin/notification-context";
 import {
   Download,
   FileSpreadsheet,
@@ -15,6 +16,7 @@ interface StatsData {
 }
 
 export default function ReportsAndExportPage() {
+  const { showError } = useAdminNotification();
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState<string | null>(null);
@@ -49,7 +51,7 @@ export default function ReportsAndExportPage() {
       const records = json.data[type] || [];
 
       if (records.length === 0) {
-        alert("No records available to export.");
+        showError("No records available to export.");
         return;
       }
 
@@ -83,7 +85,7 @@ export default function ReportsAndExportPage() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (err) {
-      alert((err as Error).message || "Export error.");
+      showError((err as Error).message || "Export error.");
     } finally {
       setExporting(null);
     }

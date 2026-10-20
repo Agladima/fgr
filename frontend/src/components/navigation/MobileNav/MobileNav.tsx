@@ -2,11 +2,13 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./MobileNav.module.css";
 import Button from "@/components/ui/Button";
 import { NavItem, PRIMARY_CTAS, SITE_METADATA } from "@/lib/constants/navigation";
 import { X, ArrowUpRight, ChevronRight, Phone, Mail, MapPin } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import logoImage from "@/assets/images/fgr logo.jpeg";
 
 export interface MobileNavProps {
   isOpen: boolean;
@@ -102,7 +104,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
             <div className={styles.drawerHeader}>
               <div className={styles.logoGroup}>
                 <div className={styles.logoMark}>
-                  <span>FGR</span>
+                  <Image src={logoImage} alt="FGR" fill sizes="38px" />
                 </div>
                 <div className={styles.brandInfo}>
                   <span className={styles.brandTitle}>CAREER DEVELOPMENT</span>

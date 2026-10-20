@@ -9,6 +9,7 @@ export interface AdminUser {
   id: string;
   email: string;
   fullName: string;
+  jobTitle?: string;
   role: StaffRole;
 }
 

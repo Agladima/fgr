@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import styles from "../admin-common.module.css";
+import { useAdminNotification } from "@/lib/admin/notification-context";
 import {
   Plus,
   Edit2,
@@ -24,6 +25,7 @@ interface EventItem {
 }
 
 export default function EventsManagementPage() {
+  const { showError } = useAdminNotification();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +100,7 @@ export default function EventsManagementPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title || !form.event_date || !form.location) {
-      alert("Please fill in Title, Event Date, and Location.");
+      showError("Please fill in Title, Event Date, and Location.");
       return;
     }
 
@@ -123,10 +125,10 @@ export default function EventsManagementPage() {
         setModalOpen(false);
         fetchEvents();
       } else {
-        alert(json.message || "Failed to save event.");
+        showError(json.message || "Failed to save event.");
       }
     } catch {
-      alert("Error saving event.");
+      showError("Error saving event.");
     } finally {
       setSaving(false);
     }
@@ -143,10 +145,10 @@ export default function EventsManagementPage() {
       if (res.ok) {
         setEvents((prev) => prev.filter((item) => item.id !== evt.id));
       } else {
-        alert("Failed to delete event.");
+        showError("Failed to delete event.");
       }
     } catch {
-      alert("Error deleting event.");
+      showError("Error deleting event.");
     }
   };
 

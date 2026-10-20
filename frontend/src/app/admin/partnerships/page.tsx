@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import styles from "../admin-common.module.css";
+import { useAdminNotification } from "@/lib/admin/notification-context";
 import {
   Search,
   Eye,
@@ -39,6 +40,7 @@ interface InternalNote {
 }
 
 export default function PartnershipsManagementPage() {
+  const { showError } = useAdminNotification();
   const [partnerships, setPartnerships] = useState<PartnershipEnquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -175,11 +177,11 @@ export default function PartnershipsManagementPage() {
         setNewNoteContent("");
         fetchNotes(selectedRecord.id);
       } else {
-        alert(json.message || "Failed to add internal note.");
+        showError(json.message || "Failed to add internal note.");
       }
     } catch (err) {
       console.error(err);
-      alert("Error adding note.");
+      showError("Error adding note.");
     } finally {
       setAddingNote(false);
     }

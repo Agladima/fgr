@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import styles from "./Header.module.css";
 import Container from "@/components/ui/Container";
@@ -14,6 +15,7 @@ import {
   PRIMARY_CTAS,
 } from "@/lib/constants/navigation";
 import { Menu, X, ArrowUpRight, ChevronDown } from "lucide-react";
+import logoImage from "@/assets/images/fgr logo.jpeg";
 
 export const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -110,7 +112,7 @@ export const Header: React.FC = () => {
             aria-label="FGR Career Development Center Home"
           >
             <div className={styles.logoMark}>
-              <span className={styles.logoMarkFGR}>FGR</span>
+              <Image src={logoImage} alt="FGR" fill sizes="42px" />
             </div>
             <div className={styles.logoTextGroup}>
               <span className={styles.logoTitle}>CAREER DEVELOPMENT</span>
