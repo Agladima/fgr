@@ -115,7 +115,7 @@ export const Header: React.FC = () => {
               <Image src={logoImage} alt="FGR" fill sizes="42px" />
             </div>
             <div className={styles.logoTextGroup}>
-              <span className={styles.logoTitle}>CAREER DEVELOPMENT</span>
+              <span className={styles.logoTitle}>FGR CAREER DEVELOPMENT</span>
               <span className={styles.logoSubtitle}>CENTER</span>
             </div>
           </Link>

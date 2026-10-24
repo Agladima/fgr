@@ -410,7 +410,7 @@ export default function StaffManagementPage() {
                   required
                   className={styles.searchInput}
                   style={{ paddingLeft: "12px" }}
-                  placeholder="staff@fgrcareer.org"
+                  placeholder="staff@fgrcdc.org.ng"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                 />

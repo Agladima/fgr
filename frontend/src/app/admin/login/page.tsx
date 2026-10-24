@@ -91,7 +91,7 @@ export default function AdminLoginPage() {
                 id="email"
                 type="email"
                 className={styles.input}
-                placeholder="name@fgrcareer.org"
+                placeholder="name@fgrcdc.org.ng"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -156,7 +156,7 @@ export default function AdminLoginPage() {
           <p style={{ margin: 0 }}>
             Return to public portal:{" "}
             <Link href="/" className={styles.footerLink}>
-              fgrcareer.org
+              fgrcdc.org.ng
             </Link>
           </p>
         </div>

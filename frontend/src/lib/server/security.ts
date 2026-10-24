@@ -267,7 +267,7 @@ export async function authenticateAdmin(req: NextRequest): Promise<AdminAuthResu
   ) {
     return {
       isAuthenticated: true,
-      email: "system-admin@fgrcareer.org",
+      email: "admin@fgrcdc.org.ng",
       fullName: "System Super Administrator",
       role: "super_admin",
     };

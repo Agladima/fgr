@@ -234,7 +234,7 @@ export default function ContactPage() {
                       <Mail size={20} className={styles.infoIcon} />
                       <div>
                         <div className={styles.infoLabel}>Official Email:</div>
-                        <div className={styles.infoValue}>contact@fgrcareer.org</div>
+                        <div className={styles.infoValue}>info@fgrcdc.org.ng</div>
                       </div>
                     </div>
 
@@ -242,7 +242,7 @@ export default function ContactPage() {
                       <Globe size={20} className={styles.infoIcon} />
                       <div>
                         <div className={styles.infoLabel}>Website:</div>
-                        <div className={styles.infoValue}>https://fgrcareer.org</div>
+                        <div className={styles.infoValue}>https://www.fgrcdc.org.ng</div>
                       </div>
                     </div>
                   </div>
@@ -254,7 +254,7 @@ export default function ContactPage() {
                   <p className={styles.partnerCalloutText}>
                     For partnership, funding, institutional-support or programme-implementation enquiries:
                     <br />
-                    <strong>Email:</strong> contact@fgrcareer.org
+                    <strong>Email:</strong> info@fgrcdc.org.ng
                     <br />
                     <em>Subject: Partnership Enquiry – FGR Career Development Center</em>
                   </p>

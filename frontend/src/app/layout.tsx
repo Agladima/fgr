@@ -22,7 +22,7 @@ const plusJakartaSans = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://fgrcareer.org"),
+  metadataBase: new URL("https://www.fgrcdc.org.ng"),
   title: {
     template: "%s | FGR Career Development Center",
     default: "FGR Career Development Center | LEARN • CONNECT • EARN",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     title: "FGR Career Development Center | LEARN • CONNECT • EARN",
     description:
       "Empowering youth, professionals, and institutions through employability, vocational training, digital innovation, and career leadership.",
-    url: "https://fgrcareer.org",
+    url: "https://www.fgrcdc.org.ng",
     siteName: "FGR Career Development Center",
     locale: "en_US",
     type: "website",

@@ -107,7 +107,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
                   <Image src={logoImage} alt="FGR" fill sizes="38px" />
                 </div>
                 <div className={styles.brandInfo}>
-                  <span className={styles.brandTitle}>CAREER DEVELOPMENT</span>
+                  <span className={styles.brandTitle}>FGR CAREER DEVELOPMENT</span>
                   <span className={styles.brandSubtitle}>CENTER</span>
                 </div>
               </div>
@@ -186,7 +186,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
             <div className={styles.drawerFooter}>
               <div className={styles.contactItem}>
                 <Mail size={14} className={styles.contactIcon} />
-                <span>info@fgrcareer.org (Placeholder)</span>
+                <span>info@fgrcdc.org.ng</span>
               </div>
               <div className={styles.contactItem}>
                 <Phone size={14} className={styles.contactIcon} />

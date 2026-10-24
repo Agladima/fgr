@@ -19,6 +19,8 @@ export const metadata: Metadata = {
     "What's happening at FGR Career Development Center: training workshops, cohort announcements, partnership updates, and opportunities.",
 };
 
+export const instant = false;
+
 interface PublicArticle {
   title: string;
   date: string;

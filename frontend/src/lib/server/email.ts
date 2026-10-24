@@ -14,10 +14,10 @@ function getResendClient(): Resend | null {
 
 const FROM_EMAIL =
   process.env.RESEND_FROM_EMAIL ||
-  "FGR Career Development Center <noreply@fgrcareer.org>";
+  "FGR Career Development Center <info@fgrcdc.org.ng>";
 
 const STAFF_EMAIL =
-  process.env.STAFF_NOTIFICATION_EMAIL || "contact@fgrcareer.org";
+  process.env.STAFF_NOTIFICATION_EMAIL || "admin@fgrcdc.org.ng";
 
 export interface EmailDeliveryResult {
   delivered: boolean;
@@ -219,8 +219,8 @@ function wrapHtmlEmail(title: string, preheader: string, contentHtml: string): s
             <td class="footer">
               <strong>FGR Career Development Center</strong><br />
               Calabar Hub &bull; Cross River State, Nigeria<br />
-              General Enquiries: <a href="mailto:contact@fgrcareer.org">contact@fgrcareer.org</a><br />
-              Official Portal: <a href="https://fgrcareer.org">fgrcareer.org</a>
+              General Enquiries: <a href="mailto:info@fgrcdc.org.ng">info@fgrcdc.org.ng</a><br />
+              Official Portal: <a href="https://www.fgrcdc.org.ng">www.fgrcdc.org.ng</a>
               <hr class="footer-divider" />
               <span style="color: #94a3b8;">
                 This automated transmission was dispatched by FGR Career Development Center. If you believe you received this in error, please reply to our enquiries desk.
@@ -293,7 +293,7 @@ export async function sendRegistrationConfirmation(
       </div>
 
       <p>
-        Please keep your contact phone number (<strong>${registration.phone}</strong>) and email accessible. If you have any urgent questions or require assistance, please reply directly or reach out to <a href="mailto:contact@fgrcareer.org">contact@fgrcareer.org</a>.
+        Please keep your contact phone number (<strong>${registration.phone}</strong>) and email accessible. If you have any urgent questions or require assistance, please reply directly or reach out to <a href="mailto:info@fgrcdc.org.ng">info@fgrcdc.org.ng</a>.
       </p>
 
       <p style="margin-top: 24px;">
@@ -429,7 +429,7 @@ export async function sendContactAcknowledgement(
       </div>
 
       <p>
-        If your request is urgent, you can also reach our hub in Calabar, Cross River State, or contact our central desk at <a href="mailto:contact@fgrcareer.org">contact@fgrcareer.org</a>.
+        If your request is urgent, you can also reach our hub in Calabar, Cross River State, or contact our central desk at <a href="mailto:info@fgrcdc.org.ng">info@fgrcdc.org.ng</a>.
       </p>
 
       <p style="margin-top: 24px;">
@@ -550,7 +550,7 @@ export async function sendPartnershipAcknowledgement(
       </div>
 
       <p>
-        Should you wish to supplement your submission with documentation or corporate profiles, please send them directly to <a href="mailto:contact@fgrcareer.org">contact@fgrcareer.org</a> citing reference <code>${partnership.id}</code>.
+        Should you wish to supplement your submission with documentation or corporate profiles, please send them directly to <a href="mailto:info@fgrcdc.org.ng">info@fgrcdc.org.ng</a> citing reference <code>${partnership.id}</code>.
       </p>
 
       <p style="margin-top: 24px;">
@@ -718,7 +718,7 @@ export async function sendStaffWelcomeEmail(
       <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 14px 16px; margin-top: 24px;">
         <strong style="color: #92400e; font-size: 13px; display: block; margin-bottom: 4px;">Security Notice</strong>
         <span style="color: #78350f; font-size: 12.5px; line-height: 1.5; display: block;">
-          Do not share this email or your temporary password with anyone. For your security, this password reset link is one-time use and will expire. If you did not expect this invitation, please immediately contact our system administrators at <a href="mailto:contact@fgrcareer.org" style="color: #92400e;">contact@fgrcareer.org</a>.
+          Do not share this email or your temporary password with anyone. For your security, this password reset link is one-time use and will expire. If you did not expect this invitation, please immediately contact our system administrators at <a href="mailto:admin@fgrcdc.org.ng" style="color: #92400e;">admin@fgrcdc.org.ng</a>.
         </span>
       </div>
       `

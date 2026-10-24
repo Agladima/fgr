@@ -9,8 +9,8 @@ import { successResponse, errorResponse } from "@/lib/server/api-response";
 export async function POST(req: NextRequest) {
   try {
     const apiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.RESEND_FROM_EMAIL || "FGR Career Development Center <noreply@fgrcareer.org>";
-    const staffEmail = process.env.STAFF_NOTIFICATION_EMAIL || "contact@fgrcareer.org";
+    const fromEmail = process.env.RESEND_FROM_EMAIL || "FGR Career Development Center <info@fgrcdc.org.ng>";
+    const staffEmail = process.env.STAFF_NOTIFICATION_EMAIL || "admin@fgrcdc.org.ng";
 
     if (!apiKey || apiKey.startsWith("re_your_api_key") || apiKey.trim() === "") {
       return errorResponse(
@@ -94,8 +94,8 @@ export async function GET() {
   return successResponse(
     {
       configured: isConfigured,
-      fromEmail: process.env.RESEND_FROM_EMAIL || "FGR Career Development Center <noreply@fgrcareer.org>",
-      staffNotificationEmail: process.env.STAFF_NOTIFICATION_EMAIL || "contact@fgrcareer.org",
+      fromEmail: process.env.RESEND_FROM_EMAIL || "FGR Career Development Center <info@fgrcdc.org.ng>",
+      staffNotificationEmail: process.env.STAFF_NOTIFICATION_EMAIL || "admin@fgrcdc.org.ng",
       instructions: "Send a POST request with { 'to': 'your_email@domain.com' } to dispatch a test email.",
     },
     isConfigured ? "Resend is configured." : "Resend API key is not configured."

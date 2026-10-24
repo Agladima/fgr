@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
     if (dbError || !inserted) {
       console.error("[DB Error] Failed to insert partnership enquiry:", dbError);
       return errorResponse(
-        "Failed to save your partnership enquiry. Please try again or reach out directly at contact@fgrcareer.org.",
+        "Failed to save your partnership enquiry. Please try again or reach out directly at info@fgrcdc.org.ng.",
         500,
         "DATABASE_ERROR",
         dbError?.message

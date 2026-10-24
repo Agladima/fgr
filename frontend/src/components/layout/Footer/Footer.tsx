@@ -126,7 +126,7 @@ export const Footer: React.FC = () => {
                   <Image src={logoImage} alt="FGR" fill sizes="44px" />
                 </div>
                 <div className={styles.logoText}>
-                  <span className={styles.logoTitle}>CAREER DEVELOPMENT</span>
+                  <span className={styles.logoTitle}>FGR CAREER DEVELOPMENT</span>
                   <span className={styles.logoSubtitle}>CENTER</span>
                 </div>
               </div>
@@ -224,7 +224,7 @@ export const Footer: React.FC = () => {
                   <div>
                     <span className={styles.contactLabel}>Email:</span>
                     <span className={styles.contactVal}>
-                      contact@fgrcareer.org (Enquiries)
+                      info@fgrcdc.org.ng (Enquiries)
                     </span>
                   </div>
                 </li>

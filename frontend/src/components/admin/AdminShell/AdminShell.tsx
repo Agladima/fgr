@@ -102,7 +102,7 @@ export default function AdminShell({ children }: AdminShellProps) {
               <Image src={logoImage} alt="FGR" fill sizes="36px" />
             </div>
             <div className={styles.brandText}>
-              <span className={styles.brandTitle}>Career Center</span>
+              <span className={styles.brandTitle}>FGR Career Center</span>
               <span className={styles.brandSub}>Operations CRM</span>
             </div>
           </div>

@@ -27,6 +27,8 @@ import {
   Handshake,
 } from "lucide-react";
 
+export const instant = false;
+
 export default async function Home() {
   const lceApproach = [
     {
