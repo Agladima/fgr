@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { authenticateAdmin, recordAuditLog, getClientIp } from "@/lib/server/security";
+import { authenticateAdmin, hasPermission, recordAuditLog, getClientIp, PermissionKey } from "@/lib/server/security";
 import { getSupabaseServiceClient, isSupabaseConfigured } from "@/lib/server/supabase";
 import { successResponse, errorResponse } from "@/lib/server/api-response";
 
@@ -10,14 +10,17 @@ const CreateNoteSchema = z.object({
   content: z.string().trim().min(2, "Note content cannot be empty."),
 });
 
+function getRequiredNotePermission(recordType: string, isWrite = false): PermissionKey {
+  if (recordType === "registration") return isWrite ? "registrations:write" : "registrations:read";
+  if (recordType === "partnership") return isWrite ? "partnerships:write" : "partnerships:read";
+  if (recordType === "enquiry") return isWrite ? "enquiries:write" : "enquiries:read";
+  return isWrite ? "follow_ups:write" : "follow_ups:read";
+}
+
 export async function GET(req: NextRequest) {
   const auth = await authenticateAdmin(req);
   if (!auth.isAuthenticated) {
     return errorResponse(auth.error || "Authentication required.", 401, "UNAUTHORIZED");
-  }
-
-  if (!isSupabaseConfigured()) {
-    return errorResponse("Database is not configured.", 503, "DATABASE_UNAVAILABLE");
   }
 
   const { searchParams } = new URL(req.url);
@@ -26,6 +29,15 @@ export async function GET(req: NextRequest) {
 
   if (!recordType || !recordId) {
     return errorResponse("recordType and recordId query parameters are required.", 400, "MISSING_PARAMS");
+  }
+
+  const requiredPerm = getRequiredNotePermission(recordType, false);
+  if (!hasPermission(auth.role || "", requiredPerm)) {
+    return errorResponse("Forbidden. Insufficient permissions to view notes for this record.", 403, "FORBIDDEN");
+  }
+
+  if (!isSupabaseConfigured()) {
+    return errorResponse("Database is not configured.", 503, "DATABASE_UNAVAILABLE");
   }
 
   try {
@@ -39,12 +51,14 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (dbError) {
-      return errorResponse("Failed to fetch internal notes.", 500, "DB_ERROR", dbError.message);
+      console.error("[Notes GET] DB error:", dbError);
+      return errorResponse("Failed to fetch internal notes.", 500, "DB_ERROR");
     }
 
     return successResponse({ notes: notes || [] });
   } catch (err) {
-    return errorResponse((err as Error).message, 500, "INTERNAL_ERROR");
+    console.error("[Notes GET] Internal error:", err);
+    return errorResponse("An unexpected error occurred while fetching notes.", 500, "INTERNAL_ERROR");
   }
 }
 
@@ -67,6 +81,16 @@ export async function POST(req: NextRequest) {
   }
 
   const { recordType, recordId, content } = parsed.data;
+
+  const requiredPerm = getRequiredNotePermission(recordType, true);
+  if (!hasPermission(auth.role || "", requiredPerm)) {
+    return errorResponse("Forbidden. Insufficient permissions to add notes to this record.", 403, "FORBIDDEN");
+  }
+
+  if (!isSupabaseConfigured()) {
+    return errorResponse("Database is not configured.", 503, "DATABASE_UNAVAILABLE");
+  }
+
   const ip = getClientIp(req);
 
   try {
@@ -87,7 +111,8 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (dbError || !createdNote) {
-      return errorResponse("Failed to save internal note.", 500, "DB_ERROR", dbError?.message);
+      console.error("[Notes POST] DB error:", dbError);
+      return errorResponse("Failed to save internal note.", 500, "DB_ERROR");
     }
 
     await recordAuditLog({
@@ -102,6 +127,7 @@ export async function POST(req: NextRequest) {
 
     return successResponse({ note: createdNote }, "Internal note added successfully.", 201);
   } catch (err) {
-    return errorResponse((err as Error).message, 500, "INTERNAL_ERROR");
+    console.error("[Notes POST] Internal error:", err);
+    return errorResponse("An unexpected error occurred while saving the note.", 500, "INTERNAL_ERROR");
   }
 }

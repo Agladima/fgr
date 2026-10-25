@@ -39,7 +39,8 @@ export async function GET(req: NextRequest) {
     const { data: logs, count, error: dbError } = await query;
 
     if (dbError) {
-      return errorResponse("Failed to fetch audit logs.", 500, "DB_ERROR", dbError.message);
+      console.error("[ActivityLogs GET] DB error:", dbError);
+      return errorResponse("Failed to fetch audit logs.", 500, "DB_ERROR");
     }
 
     return successResponse({
@@ -52,6 +53,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    return errorResponse((err as Error).message, 500, "INTERNAL_ERROR");
+    console.error("[ActivityLogs GET] Internal error:", err);
+    return errorResponse("An unexpected error occurred while fetching audit logs.", 500, "INTERNAL_ERROR");
   }
 }

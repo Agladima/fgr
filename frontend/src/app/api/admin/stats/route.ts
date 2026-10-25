@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { authenticateAdmin } from "@/lib/server/security";
+import { authenticateAdmin, hasPermission } from "@/lib/server/security";
 import { getSupabaseServiceClient, isSupabaseConfigured } from "@/lib/server/supabase";
 import { successResponse, errorResponse } from "@/lib/server/api-response";
 
@@ -10,6 +10,14 @@ export async function GET(req: NextRequest) {
       auth.error || "Unauthorized. Administrative privileges required.",
       401,
       "UNAUTHORIZED"
+    );
+  }
+
+  if (!hasPermission(auth.role || "", "reports:read")) {
+    return errorResponse(
+      "Forbidden. Your staff role does not have permission to view dashboard statistics.",
+      403,
+      "FORBIDDEN"
     );
   }
 

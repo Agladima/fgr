@@ -12,6 +12,7 @@ import news1Image from "@/assets/images/news1.jpg";
 import news2Image from "@/assets/images/news2.jpg";
 import news3Image from "@/assets/images/news3.jpg";
 import { getSupabasePublicClient, isSupabaseConfigured } from "@/lib/server/supabase";
+import { Calendar, MapPin, ArrowUpRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "News & Events",
@@ -30,34 +31,45 @@ interface PublicArticle {
   imageAlt: string;
 }
 
+interface PublicEvent {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  dateStr: string;
+  timeStr: string;
+  location: string;
+  registrationUrl: string;
+}
+
 const fallbackArticles: PublicArticle[] = [
-    {
-      title: "2026 Workforce Development Cohort Registration Opened in Calabar",
-      date: "October 14, 2026",
-      category: "Admissions",
-      summary:
-        "FGR Career Development Center has officially opened applications for upcoming training streams across technical trades, digital literacy, and employability pathways.",
-      image: news1Image,
-      imageAlt: "Facilitator leading an employability workshop",
-    },
-    {
-      title: "Digital Innovation Bootcamp: AI, Product Tools & Remote Work Readiness",
-      date: "September 28, 2026",
-      category: "Training & Workshops",
-      summary:
-        "An intensive multi-week cohort aimed at equipping young professionals and university graduates with high-demand digital design, marketing, and productivity tool competencies.",
-      image: news2Image,
-      imageAlt: "Panel discussion at a workforce development event",
-    },
-    {
-      title: "FGR Career Development Center Concludes Institutional Partnership Round",
-      date: "August 15, 2026",
-      category: "Partnership News",
-      summary:
-        "Strategic engagements with local employers, vocational foundations, and academic institutions to scale graduate internship and apprenticeship pipelines across Cross River State.",
-      image: news3Image,
-      imageAlt: "Professional reviewing performance data on a laptop",
-    },
+  {
+    title: "2026 Workforce Development Cohort Registration Opened in Calabar",
+    date: "October 14, 2026",
+    category: "Admissions",
+    summary:
+      "FGR Career Development Center has officially opened applications for upcoming training streams across technical trades, digital literacy, and employability pathways.",
+    image: news1Image,
+    imageAlt: "Facilitator leading an employability workshop",
+  },
+  {
+    title: "Digital Innovation Bootcamp: AI, Product Tools & Remote Work Readiness",
+    date: "September 28, 2026",
+    category: "Training & Workshops",
+    summary:
+      "An intensive multi-week cohort aimed at equipping young professionals and university graduates with high-demand digital design, marketing, and productivity tool competencies.",
+    image: news2Image,
+    imageAlt: "Panel discussion at a workforce development event",
+  },
+  {
+    title: "FGR Career Development Center Concludes Institutional Partnership Round",
+    date: "August 15, 2026",
+    category: "Partnership News",
+    summary:
+      "Strategic engagements with local employers, vocational foundations, and academic institutions to scale graduate internship and apprenticeship pipelines across Cross River State.",
+    image: news3Image,
+    imageAlt: "Professional reviewing performance data on a laptop",
+  },
 ];
 
 async function getPublishedArticles(): Promise<PublicArticle[]> {
@@ -90,8 +102,42 @@ async function getPublishedArticles(): Promise<PublicArticle[]> {
   }
 }
 
+async function getUpcomingEvents(): Promise<PublicEvent[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  try {
+    const supabase = getSupabasePublicClient();
+    const { data, error } = await supabase
+      .from("events")
+      .select("id, title, category, description, event_date, location, registration_url")
+      .in("status", ["upcoming", "published", "ongoing"])
+      .order("event_date", { ascending: true });
+
+    if (error || !data) return [];
+
+    return data.map((e) => {
+      const dt = new Date(e.event_date);
+      return {
+        id: e.id,
+        title: e.title,
+        category: e.category,
+        description: e.description,
+        dateStr: dt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        timeStr: dt.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+        location: e.location,
+        registrationUrl: e.registration_url || `/contact?subject=Event+Registration+for+${encodeURIComponent(e.title)}`,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
 export default async function NewsEventsPage() {
-  const articles = await getPublishedArticles();
+  const [articles, events] = await Promise.all([
+    getPublishedArticles(),
+    getUpcomingEvents(),
+  ]);
 
   const categories = [
     {
@@ -218,6 +264,71 @@ export default async function NewsEventsPage() {
           </StaggerGroup>
         </Container>
       </section>
+
+      {/* ============================================================
+          UPCOMING EVENTS (If Scheduled)
+          ============================================================ */}
+      {events.length > 0 && (
+        <section className={styles.section} style={{ paddingTop: 0 }}>
+          <Container size="wide">
+            <MotionSection direction="up">
+              <SectionHeading
+                eyebrow="CALENDAR"
+                title="Upcoming Events &amp; Workshops"
+                description="Upcoming physical and virtual sessions hosted by FGR:"
+                align="left"
+              />
+            </MotionSection>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px", marginTop: "24px" }}>
+              {events.map((evt) => (
+                <div
+                  key={evt.id}
+                  style={{
+                    background: "#ffffff",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "12px",
+                    padding: "24px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.03)",
+                  }}
+                >
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                      <span style={{ fontSize: "11px", fontWeight: 700, color: "#16587b", background: "rgba(22, 88, 123, 0.08)", padding: "3px 8px", borderRadius: 4, textTransform: "uppercase" }}>
+                        {evt.category}
+                      </span>
+                      <span style={{ fontSize: "12px", color: "#64748b", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        <Calendar size={13} /> {evt.dateStr}
+                      </span>
+                    </div>
+
+                    <h3 style={{ fontSize: "17px", fontWeight: 700, margin: "0 0 8px 0", color: "#141b22" }}>
+                      {evt.title}
+                    </h3>
+                    <p style={{ fontSize: "13.5px", color: "#475569", margin: "0 0 16px 0", lineHeight: 1.5 }}>
+                      {evt.description}
+                    </p>
+
+                    <div style={{ fontSize: "12.5px", color: "#64748b", display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
+                      <MapPin size={14} style={{ color: "#16587b", flexShrink: 0 }} />
+                      <span>{evt.location} • {evt.timeStr}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: "auto" }}>
+                    <Button variant="primary" size="sm" href={evt.registrationUrl} rightIcon={<ArrowUpRight size={14} />}>
+                      Register for Event
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* ============================================================
           EVENT CATEGORIES & STREAMS

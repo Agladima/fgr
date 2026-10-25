@@ -75,7 +75,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       .single();
 
     if (dbError || !updatedTask) {
-      return errorResponse("Task not found or update failed.", 404, "NOT_FOUND", dbError?.message);
+      console.error("[FollowUps PATCH] DB error:", dbError);
+      return errorResponse("Task not found or update failed.", 404, "NOT_FOUND");
     }
 
     await recordAuditLog({
@@ -91,7 +92,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     return successResponse({ task: updatedTask }, "Task updated successfully.");
   } catch (err) {
-    return errorResponse((err as Error).message, 500, "INTERNAL_ERROR");
+    console.error("[FollowUps PATCH] Internal error:", err);
+    return errorResponse("An unexpected error occurred while updating the task.", 500, "INTERNAL_ERROR");
   }
 }
 
@@ -117,7 +119,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       .eq("id", id);
 
     if (dbError) {
-      return errorResponse("Failed to delete task.", 500, "DB_ERROR", dbError.message);
+      console.error("[FollowUps DELETE] DB error:", dbError);
+      return errorResponse("Failed to delete task.", 500, "DB_ERROR");
     }
 
     await recordAuditLog({
@@ -132,6 +135,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
 
     return successResponse(null, "Task deleted successfully.");
   } catch (err) {
-    return errorResponse((err as Error).message, 500, "INTERNAL_ERROR");
+    console.error("[FollowUps DELETE] Internal error:", err);
+    return errorResponse("An unexpected error occurred while deleting the task.", 500, "INTERNAL_ERROR");
   }
 }

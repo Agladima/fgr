@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { authenticateAdmin } from "@/lib/server/security";
+import { authenticateAdmin, hasPermission } from "@/lib/server/security";
 import { getSupabaseServiceClient, isSupabaseConfigured } from "@/lib/server/supabase";
 import { successResponse, errorResponse } from "@/lib/server/api-response";
 
@@ -11,6 +11,15 @@ export async function GET(req: NextRequest) {
       auth.error || "Unauthorized. Administrative privileges required.",
       401,
       "UNAUTHORIZED"
+    );
+  }
+
+  // 2. Enforce RBAC permission
+  if (!hasPermission(auth.role || "", "registrations:read")) {
+    return errorResponse(
+      "Forbidden. Your staff role does not have permission to view training registrations.",
+      403,
+      "FORBIDDEN"
     );
   }
 

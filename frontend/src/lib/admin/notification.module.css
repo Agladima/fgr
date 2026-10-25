@@ -55,6 +55,15 @@
   color: var(--color-error);
 }
 
+.popupSuccess {
+  border-color: #86efac;
+  border-left-color: #16a34a;
+}
+
+.iconSuccess {
+  color: #16a34a;
+}
+
 @keyframes notificationIn {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }

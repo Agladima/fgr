@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getSupabasePublicClient, getSupabaseServiceClient, isSupabaseConfigured } from "@/lib/server/supabase";
-import { recordAuditLog, getClientIp } from "@/lib/server/security";
+import { recordAuditLog, getClientIp, checkRateLimit } from "@/lib/server/security";
 import { errorResponse } from "@/lib/server/api-response";
 
 const LoginSchema = z.object({
@@ -33,6 +33,16 @@ export async function POST(req: NextRequest) {
 
   const { email, password } = parsed.data;
   const ip = getClientIp(req);
+
+  // Rate limit: max 5 login attempts per 15 minutes per IP
+  const rateLimit = checkRateLimit(ip, "admin_login", 5, 15 * 60 * 1000);
+  if (!rateLimit.allowed) {
+    return errorResponse(
+      `Too many login attempts. Please wait ${rateLimit.resetInSeconds} seconds before trying again.`,
+      429,
+      "RATE_LIMIT_EXCEEDED"
+    );
+  }
 
   try {
     const supabase = getSupabasePublicClient();
@@ -81,6 +91,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Create response with secure HTTP-only cookie
+    // Token is NOT included in JSON body — only delivered via httpOnly cookie
     const response = NextResponse.json({
       success: true,
       message: "Staff authentication successful.",
@@ -92,7 +103,6 @@ export async function POST(req: NextRequest) {
           jobTitle: profile.job_title,
           role: profile.role,
         },
-        token,
       },
     });
 

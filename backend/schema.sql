@@ -446,4 +446,50 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres, anon,
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres, anon, authenticated, service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON ROUTINES TO postgres, anon, authenticated, service_role;
 
+-- 6. CMS LIFECYCLE & CONTENT ENHANCEMENTS
+ALTER TABLE public.programmes
+  ADD COLUMN IF NOT EXISTS application_open_date TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS application_close_date TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS eligibility TEXT,
+  ADD COLUMN IF NOT EXISTS application_instructions TEXT,
+  ADD COLUMN IF NOT EXISTS registration_url TEXT;
+
+ALTER TABLE public.programmes DROP CONSTRAINT IF EXISTS programmes_status_check;
+ALTER TABLE public.programmes ADD CONSTRAINT programmes_status_check
+  CHECK (status IN ('draft', 'published', 'open', 'closing_soon', 'closed', 'completed', 'archived'));
+
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS featured_image_url TEXT;
+ALTER TABLE public.events DROP CONSTRAINT IF EXISTS events_status_check;
+ALTER TABLE public.events ADD CONSTRAINT events_status_check
+  CHECK (status IN ('draft', 'published', 'upcoming', 'ongoing', 'completed', 'cancelled', 'archived'));
+
+ALTER TABLE public.resources
+  ADD COLUMN IF NOT EXISTS cover_image_url TEXT,
+  ADD COLUMN IF NOT EXISTS is_confidential BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE public.resources DROP CONSTRAINT IF EXISTS resources_status_check;
+ALTER TABLE public.resources ADD CONSTRAINT resources_status_check
+  CHECK (status IN ('draft', 'published', 'active', 'archived'));
+
+ALTER TABLE public.success_stories
+  ADD COLUMN IF NOT EXISTS role_after TEXT,
+  ADD COLUMN IF NOT EXISTS story TEXT,
+  ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE public.success_stories
+  ALTER COLUMN challenge DROP NOT NULL,
+  ALTER COLUMN experience DROP NOT NULL,
+  ALTER COLUMN outcome DROP NOT NULL,
+  ALTER COLUMN quote DROP NOT NULL;
+ALTER TABLE public.success_stories DROP CONSTRAINT IF EXISTS success_stories_status_check;
+ALTER TABLE public.success_stories ADD CONSTRAINT success_stories_status_check
+  CHECK (status IN ('draft', 'published', 'active', 'archived', 'hidden'));
+
+ALTER TABLE public.impact_metrics
+  ADD COLUMN IF NOT EXISTS display_format TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS description TEXT,
+  ADD COLUMN IF NOT EXISTS reporting_period TEXT,
+  ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('draft', 'published', 'archived'));
+
+ALTER TABLE public.media_files ADD COLUMN IF NOT EXISTS alt_text TEXT;
+
+
 

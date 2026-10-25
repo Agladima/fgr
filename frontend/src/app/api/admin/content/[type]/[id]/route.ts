@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { authenticateAdmin, hasPermission, recordAuditLog, getClientIp } from "@/lib/server/security";
 import { getSupabaseServiceClient, isSupabaseConfigured } from "@/lib/server/supabase";
 import { successResponse, errorResponse } from "@/lib/server/api-response";
+import { revalidateContentPaths } from "@/lib/server/content-revalidate";
 
 interface Params {
   params: Promise<{ type: string; id: string }>;
@@ -69,6 +70,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       ipAddress: ip,
     });
 
+    revalidateContentPaths(type);
+
     return successResponse({ record: updatedRecord }, `${type} updated successfully.`);
   } catch (err) {
     return errorResponse((err as Error).message, 500, "INTERNAL_ERROR");
@@ -110,6 +113,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       resourceId: id,
       ipAddress: ip,
     });
+
+    revalidateContentPaths(type);
 
     return successResponse(null, `${type} record deleted successfully.`);
   } catch (err) {

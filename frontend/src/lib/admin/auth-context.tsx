@@ -140,7 +140,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     if (user.role === "admin") return true;
 
     if (user.role === "training_officer") {
-      return permission.startsWith("registrations:") || permission.startsWith("follow_ups:") || permission.startsWith("reports:");
+      return permission.startsWith("registrations:") || permission.startsWith("programmes:") || permission.startsWith("events:") || permission.startsWith("follow_ups:") || permission.startsWith("reports:");
     }
 
     if (user.role === "partnerships_officer") {

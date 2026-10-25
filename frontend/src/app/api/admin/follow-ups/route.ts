@@ -54,12 +54,14 @@ export async function GET(req: NextRequest) {
     const { data: tasks, error: dbError } = await query;
 
     if (dbError) {
-      return errorResponse("Failed to fetch follow-up tasks.", 500, "DB_ERROR", dbError.message);
+      console.error("[FollowUps GET] DB error:", dbError);
+      return errorResponse("Failed to fetch follow-up tasks.", 500, "DB_ERROR");
     }
 
     return successResponse({ tasks: tasks || [] });
   } catch (err) {
-    return errorResponse((err as Error).message, 500, "INTERNAL_ERROR");
+    console.error("[FollowUps GET] Internal error:", err);
+    return errorResponse("An unexpected error occurred while fetching follow-up tasks.", 500, "INTERNAL_ERROR");
   }
 }
 
@@ -113,7 +115,8 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (dbError || !createdTask) {
-      return errorResponse("Failed to create follow-up task.", 500, "DB_ERROR", dbError?.message);
+      console.error("[FollowUps POST] DB error:", dbError);
+      return errorResponse("Failed to create follow-up task.", 500, "DB_ERROR");
     }
 
     await recordAuditLog({
@@ -129,6 +132,7 @@ export async function POST(req: NextRequest) {
 
     return successResponse({ task: createdTask }, "Follow-up task created successfully.", 201);
   } catch (err) {
-    return errorResponse((err as Error).message, 500, "INTERNAL_ERROR");
+    console.error("[FollowUps POST] Internal error:", err);
+    return errorResponse("An unexpected error occurred while creating the task.", 500, "INTERNAL_ERROR");
   }
 }

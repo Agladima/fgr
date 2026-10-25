@@ -1,13 +1,35 @@
 import { NextRequest } from "next/server";
 import { Resend } from "resend";
+import { authenticateAdmin, hasPermission, recordAuditLog, getClientIp } from "@/lib/server/security";
 import { successResponse, errorResponse } from "@/lib/server/api-response";
 
 /**
  * Diagnostic endpoint to test Resend email connectivity and deliverability.
+ * Restricted to authorized Super Administrators only.
  * POST /api/admin/test-email with { "to": "your-email@example.com" }
  */
 export async function POST(req: NextRequest) {
+  // 1. Authenticate staff
+  const auth = await authenticateAdmin(req);
+  if (!auth.isAuthenticated) {
+    return errorResponse(
+      auth.error || "Unauthorized. Administrative privileges required.",
+      401,
+      "UNAUTHORIZED"
+    );
+  }
+
+  // 2. Require super_admin or settings:manage permission
+  if (!hasPermission(auth.role || "", "settings:manage")) {
+    return errorResponse(
+      "Forbidden. Only Super Administrators can trigger diagnostic email broadcasts.",
+      403,
+      "FORBIDDEN"
+    );
+  }
+
   try {
+    const ip = getClientIp(req);
     const apiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.RESEND_FROM_EMAIL || "FGR Career Development Center <info@fgrcdc.org.ng>";
     const staffEmail = process.env.STAFF_NOTIFICATION_EMAIL || "admin@fgrcdc.org.ng";
@@ -68,6 +90,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Record audit log for test email transmission
+    await recordAuditLog({
+      actorId: auth.userId,
+      actorEmail: auth.email || "system",
+      actorRole: auth.role || "unknown",
+      action: "settings.test_email",
+      resourceType: "email",
+      resourceId: data?.id || null,
+      details: { recipient, sender: fromEmail },
+      ipAddress: ip,
+    });
+
     return successResponse(
       {
         messageId: data?.id,
@@ -87,7 +121,24 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await authenticateAdmin(req);
+  if (!auth.isAuthenticated) {
+    return errorResponse(
+      auth.error || "Unauthorized.",
+      401,
+      "UNAUTHORIZED"
+    );
+  }
+
+  if (!hasPermission(auth.role || "", "settings:manage")) {
+    return errorResponse(
+      "Forbidden. Only Super Administrators can view email configuration status.",
+      403,
+      "FORBIDDEN"
+    );
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
   const isConfigured = Boolean(apiKey && !apiKey.startsWith("re_your_api_key") && apiKey.trim() !== "");
 

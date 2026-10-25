@@ -55,6 +55,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return errorResponse("You cannot deactivate your own Super Admin account.", 400, "SELF_DEACTIVATION_PREVENTED");
   }
 
+  if (auth.userId === id && parsed.data.role !== undefined && parsed.data.role !== auth.role) {
+    return errorResponse("You cannot change your own role. Another Super Administrator must do this.", 400, "SELF_DEMOTION_PREVENTED");
+  }
+
   const updates: Record<string, unknown> = {};
   if (parsed.data.fullName !== undefined) updates.full_name = parsed.data.fullName;
   if (parsed.data.jobTitle !== undefined) updates.job_title = parsed.data.jobTitle;

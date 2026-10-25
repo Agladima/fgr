@@ -6,7 +6,8 @@ import Button from "@/components/ui/Button";
 import SectionHeading from "@/components/ui/SectionHeading";
 import MotionSection from "@/components/animations/MotionSection";
 import { StaggerGroup, StaggerItem } from "@/components/animations/StaggerGroup";
-import { ArrowUpRight } from "lucide-react";
+import { getSupabasePublicClient, isSupabaseConfigured } from "@/lib/server/supabase";
+import { ArrowUpRight, Download, FileText, ExternalLink } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Resources & Toolkits",
@@ -14,7 +15,75 @@ export const metadata: Metadata = {
     "Knowledge, tools, and opportunities: career guides, business planning, digital skillkits, funding opportunities, and research publications.",
 };
 
-export default function ResourcesPage() {
+export const instant = false;
+
+interface PublicResource {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  file_url?: string | null;
+  external_link?: string | null;
+  format: string;
+}
+
+const fallbackDirectResources: PublicResource[] = [
+  {
+    id: "r1",
+    title: "Modern CV & Cover Letter Architecture",
+    category: "Career Resources",
+    description: "Comprehensive guide and ATS-ready templates for job seekers and recent graduates.",
+    file_url: "/resources/fgr-cv-guide.pdf",
+    format: "PDF",
+  },
+  {
+    id: "r2",
+    title: "SME Business Plan & Cash Flow Toolkit",
+    category: "Entrepreneurship & Business Resources",
+    description: "Financial forecasting spreadsheets and operational roadmaps for local enterprises.",
+    file_url: "/resources/fgr-business-toolkit.xlsx",
+    format: "XLSX",
+  },
+  {
+    id: "r3",
+    title: "Digital Productivity & AI Prompt Handbook",
+    category: "Digital Skills Resources",
+    description: "Workplace workflows, cloud collaboration guidelines, and responsible AI usage.",
+    file_url: "/resources/fgr-digital-guide.pdf",
+    format: "PDF",
+  },
+  {
+    id: "r4",
+    title: "Workforce Development Annual Review",
+    category: "Reports & Publications",
+    description: "In-depth research on skills acquisition, labour market trends, and economic indicators in Cross River.",
+    file_url: "/resources/fgr-annual-report.pdf",
+    format: "PDF",
+  },
+];
+
+async function getPublishedResources(): Promise<PublicResource[]> {
+  if (!isSupabaseConfigured()) return fallbackDirectResources;
+
+  try {
+    const supabase = getSupabasePublicClient();
+    const { data, error } = await supabase
+      .from("resources")
+      .select("id, title, category, description, file_url, external_link, format")
+      .in("status", ["active", "published"])
+      .eq("is_confidential", false)
+      .order("order_index", { ascending: true });
+
+    if (error || !data || data.length === 0) return fallbackDirectResources;
+    return data;
+  } catch {
+    return fallbackDirectResources;
+  }
+}
+
+export default async function ResourcesPage() {
+  const liveResources = await getPublishedResources();
+
   const resourceCategories = [
     {
       title: "Career Resources",
@@ -27,7 +96,7 @@ export default function ResourcesPage() {
         "Professional communication toolkits",
         "Career development materials",
       ],
-      action: "Explore Career Resources",
+      action: "Inquire About Career Materials",
       href: "/contact?subject=Career+Resources",
     },
     {
@@ -41,7 +110,7 @@ export default function ResourcesPage() {
         "Business-development materials",
         "SME growth checklists",
       ],
-      action: "Explore Business Resources",
+      action: "Inquire About Business Guides",
       href: "/contact?subject=Business+Resources",
     },
     {
@@ -55,7 +124,7 @@ export default function ResourcesPage() {
         "AI learning resources",
         "Online learning recommendations",
       ],
-      action: "Explore Digital Resources",
+      action: "Inquire About Digital Toolkits",
       href: "/contact?subject=Digital+Resources",
     },
     {
@@ -69,7 +138,7 @@ export default function ResourcesPage() {
         "Business opportunities & tenders",
         "Employment & internship openings",
       ],
-      action: "View Opportunities",
+      action: "View Opportunities & News",
       href: "/news-events",
     },
     {
@@ -83,7 +152,7 @@ export default function ResourcesPage() {
         "HR and recruitment toolkits",
         "Standard operating procedure templates",
       ],
-      action: "Explore Organisational Resources",
+      action: "Inquire About Organisational Toolkits",
       href: "/contact?subject=Organisational+Resources",
     },
     {
@@ -97,7 +166,7 @@ export default function ResourcesPage() {
         "Knowledge products & whitepapers",
         "Policy briefs & recommendations",
       ],
-      action: "View Publications",
+      action: "Inquire About Research Releases",
       href: "/contact?subject=Publications",
     },
   ];
@@ -127,10 +196,74 @@ export default function ResourcesPage() {
       </section>
 
       {/* ============================================================
+          DIRECT DOWNLOADABLE PUBLICATIONS & GUIDES
+          ============================================================ */}
+      {liveResources.length > 0 && (
+        <section className={styles.section} style={{ paddingBottom: "1.5rem" }}>
+          <Container size="wide">
+            <MotionSection direction="up">
+              <SectionHeading
+                eyebrow="FEATURED TOOLKITS"
+                title="Downloadable Guides &amp; Frameworks"
+                description="Access practical toolkits, curriculum guides, and official reports prepared by the Centre:"
+                align="left"
+              />
+            </MotionSection>
+
+            <StaggerGroup className={styles.resourcesGrid} staggerDelay={0.07}>
+              {liveResources.map((res) => {
+                const targetUrl = res.file_url || res.external_link || "/contact?subject=" + encodeURIComponent(res.title);
+                return (
+                  <StaggerItem key={res.id} className={styles.resourceCard}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                      <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-primary)", textTransform: "uppercase", background: "rgba(22, 88, 123, 0.08)", padding: "3px 8px", borderRadius: 4 }}>
+                        {res.category}
+                      </span>
+                      <span style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", background: "#f1f5f9", padding: "2px 6px", borderRadius: 4 }}>
+                        {res.format}
+                      </span>
+                    </div>
+
+                    <h3 className={styles.resourceTitle} style={{ fontSize: "1.125rem", marginBottom: "0.5rem" }}>
+                      {res.title}
+                    </h3>
+                    <p className={styles.resourceDesc} style={{ marginBottom: "1.5rem" }}>
+                      {res.description}
+                    </p>
+
+                    <div style={{ marginTop: "auto" }}>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        href={targetUrl}
+                        external={Boolean(res.file_url || res.external_link)}
+                        rightIcon={res.file_url ? <Download size={14} /> : <ExternalLink size={14} />}
+                      >
+                        {res.file_url ? `Download ${res.format}` : "Access Resource"}
+                      </Button>
+                    </div>
+                  </StaggerItem>
+                );
+              })}
+            </StaggerGroup>
+          </Container>
+        </section>
+      )}
+
+      {/* ============================================================
           RESOURCES CATALOGUE
           ============================================================ */}
-      <section className={styles.section}>
+      <section className={`${styles.section} ${styles.sectionAlt}`}>
         <Container size="wide">
+          <MotionSection direction="up">
+            <SectionHeading
+              eyebrow="RESOURCE DOMAINS"
+              title="Curated Knowledge Domains"
+              description="Explore structured subject areas and advisory support across our strategic focus areas:"
+              align="left"
+            />
+          </MotionSection>
+
           <StaggerGroup className={styles.resourcesGrid} staggerDelay={0.08}>
             {resourceCategories.map((cat) => (
               <StaggerItem key={cat.title} className={styles.resourceCard}>

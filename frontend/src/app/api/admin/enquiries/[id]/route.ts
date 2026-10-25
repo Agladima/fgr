@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { authenticateAdmin } from "@/lib/server/security";
+import { authenticateAdmin, hasPermission, recordAuditLog, getClientIp } from "@/lib/server/security";
 import { getSupabaseServiceClient, isSupabaseConfigured } from "@/lib/server/supabase";
 import { UpdateContactStatusSchema } from "@/lib/server/validation";
 import { successResponse, errorResponse } from "@/lib/server/api-response";
@@ -12,6 +12,10 @@ export async function GET(req: NextRequest, { params }: Params) {
   const auth = await authenticateAdmin(req);
   if (!auth.isAuthenticated) {
     return errorResponse(auth.error || "Unauthorized.", 401, "UNAUTHORIZED");
+  }
+
+  if (!hasPermission(auth.role || "", "enquiries:read")) {
+    return errorResponse("Forbidden. You do not have permission to view this enquiry.", 403, "FORBIDDEN");
   }
 
   if (!isSupabaseConfigured()) {
@@ -37,6 +41,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const auth = await authenticateAdmin(req);
   if (!auth.isAuthenticated) {
     return errorResponse(auth.error || "Unauthorized.", 401, "UNAUTHORIZED");
+  }
+
+  if (!hasPermission(auth.role || "", "enquiries:write")) {
+    return errorResponse("Forbidden. You do not have permission to update enquiries.", 403, "FORBIDDEN");
   }
 
   if (!isSupabaseConfigured()) {
@@ -77,8 +85,21 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     .single();
 
   if (error) {
-    return errorResponse("Failed to update enquiry status.", 500, "DATABASE_ERROR", error.message);
+    console.error("[DB Error] Update enquiry:", error);
+    return errorResponse("Failed to update enquiry status.", 500, "DATABASE_ERROR");
   }
+
+  const ip = getClientIp(req);
+  await recordAuditLog({
+    actorId: auth.userId,
+    actorEmail: auth.email || "staff",
+    actorRole: auth.role || "unknown",
+    action: "enquiries.update_status",
+    resourceType: "contact_enquiry",
+    resourceId: id,
+    details: { newStatus: status },
+    ipAddress: ip,
+  });
 
   return successResponse(data, "Enquiry status updated successfully.");
 }
@@ -87,6 +108,10 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const auth = await authenticateAdmin(req);
   if (!auth.isAuthenticated) {
     return errorResponse(auth.error || "Unauthorized.", 401, "UNAUTHORIZED");
+  }
+
+  if (auth.role !== "super_admin" && auth.role !== "admin") {
+    return errorResponse("Forbidden. Only Administrators can permanently remove contact enquiries.", 403, "FORBIDDEN");
   }
 
   if (!isSupabaseConfigured()) {
@@ -101,8 +126,20 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     .eq("id", id);
 
   if (error) {
-    return errorResponse("Failed to delete enquiry.", 500, "DATABASE_ERROR", error.message);
+    console.error("[DB Error] Delete enquiry:", error);
+    return errorResponse("Failed to delete enquiry.", 500, "DATABASE_ERROR");
   }
+
+  const ip = getClientIp(req);
+  await recordAuditLog({
+    actorId: auth.userId,
+    actorEmail: auth.email || "staff",
+    actorRole: auth.role || "unknown",
+    action: "enquiries.delete",
+    resourceType: "contact_enquiry",
+    resourceId: id,
+    ipAddress: ip,
+  });
 
   return successResponse({ id }, "Enquiry deleted successfully.");
 }
