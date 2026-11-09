@@ -43,6 +43,25 @@
   margin-left: auto;
 }
 
+@media (max-width: 767px) {
+  .container {
+    margin-bottom: var(--space-4);
+  }
+
+  .title {
+    font-size: 1.65rem;
+    line-height: 1.2;
+  }
+
+  .description {
+    font-size: var(--font-size-base);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+}
+
 /* THEMES */
 .light .title {
   color: var(--color-text-heading);

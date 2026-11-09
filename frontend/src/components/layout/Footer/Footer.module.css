@@ -67,6 +67,13 @@
   box-shadow: var(--shadow-pearl);
 }
 
+@media (max-width: 767px) {
+  .ctaHeading {
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+}
+
 @media (min-width: 900px) {
   .ctaStripContainer {
     flex-direction: row;

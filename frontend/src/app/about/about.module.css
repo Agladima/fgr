@@ -277,3 +277,17 @@
   line-height: var(--line-height-relaxed);
   margin-bottom: var(--space-6);
 }
+
+@media (max-width: 767px) {
+  .headerSection p {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+
+  .section {
+    padding-top: var(--space-10);
+    padding-bottom: var(--space-10);
+  }
+}

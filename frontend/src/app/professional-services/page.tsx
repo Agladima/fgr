@@ -194,8 +194,9 @@ export default function ProfessionalServicesPage() {
                 Ready to Strengthen Your Institutional Delivery?
               </h2>
               <p className={styles.enquireText}>
-                Connect with our advisory team to discuss technical assistance,
-                project management, grant proposal development, or workforce consulting.
+                <span>Connect with our advisory team to discuss</span>
+                <span>technical assistance, project management,</span>
+                <span>grant proposal development, or workforce consulting.</span>
               </p>
               <Button variant="secondary" size="lg" href="/partnership-enquiry" rightIcon={<ArrowUpRight size={18} />}>
                 Enquire About Professional Services

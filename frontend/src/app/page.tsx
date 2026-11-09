@@ -221,24 +221,31 @@ export default async function Home() {
                 <span className={styles.heroTitleLine}>Connecting Them to Opportunities.</span>
               </h1>
 
-              {/* Official Description */}
-              <p className={styles.heroLead}>
-                <span className={styles.heroLeadLine}>
-                  <strong>FGR Career Development Center</strong> is a workforce-development institution focused on equipping young people and adults with practical skills,
-                </span>
-                <span className={styles.heroLeadLine}>
-                  professional competencies and entrepreneurial capacity for employment, enterprise and meaningful economic participation.
-                </span>
-              </p>
+              <div className={styles.heroDesktopCopy}>
+                {/* Official Description */}
+                <p className={styles.heroLead}>
+                  <span className={styles.heroLeadLine}>
+                    <strong>FGR Career Development Center</strong> is a workforce-development institution focused on equipping young people and adults with practical skills,
+                  </span>
+                  <span className={styles.heroLeadLine}>
+                    professional competencies and entrepreneurial capacity for employment, enterprise and meaningful economic participation.
+                  </span>
+                </p>
+                <p className={styles.heroSubtext}>
+                  <span className={styles.heroSubtextLine}>
+                    We provide training, skills development, enterprise support, professional development and project-related services
+                  </span>
+                  <span className={styles.heroSubtextLine}>
+                    while connecting individuals and organisations with opportunities for growth, collaboration and advancement.
+                  </span>
+                </p>
+              </div>
 
-              <p className={styles.heroSubtext}>
-                <span className={styles.heroSubtextLine}>
-                  We provide training, skills development, enterprise support, professional development and project-related services
-                </span>
-                <span className={styles.heroSubtextLine}>
-                  while connecting individuals and organisations with opportunities for growth, collaboration and advancement.
-                </span>
-              </p>
+              <div className={styles.heroMobileCopy}>
+                <p className={styles.heroMobilePreview}>
+                  <span>Connecting skills to work, enterprise and opportunity.</span>
+                </p>
+              </div>
 
               {/* Prominent Action Buttons */}
               <div className={styles.heroActions}>
@@ -270,14 +277,15 @@ export default async function Home() {
       {/* ============================================================
           2. WHY FGR CAREER DEVELOPMENT CENTER? — From Learning to Opportunity
           ============================================================ */}
-      <section className={styles.section} aria-labelledby="why-heading">
+      <section className={`${styles.section} ${styles.whySection}`} aria-labelledby="why-heading">
         <Container size="wide">
           <MotionSection direction="up" delay={0}>
             <div className={styles.whyHeader}>
               <SectionHeading
                 eyebrow="WHY FGR CAREER DEVELOPMENT CENTER?"
-                title={<span id="why-heading">From Learning to Opportunity</span>}
+                title={<span id="why-heading" className={styles.mobileSingleLineHeading}>From Learning to Opportunity</span>}
                 align="left"
+                className={styles.whySectionHeading}
               />
               <p className={styles.whyHighlight}>
                 Training should not end with a certificate.
@@ -307,7 +315,7 @@ export default async function Home() {
       {/* ============================================================
           3. ABOUT FGR CAREER DEVELOPMENT CENTER — Who We Are
           ============================================================ */}
-      <section className={`${styles.section} ${styles.sectionAlt}`} aria-labelledby="about-heading">
+      <section className={`${styles.section} ${styles.sectionAlt} ${styles.aboutSection}`} aria-labelledby="about-heading">
         <Container size="wide">
           <MotionSection direction="up">
             <div className={styles.aboutCard}>
@@ -319,18 +327,18 @@ export default async function Home() {
                     theme="dark"
                     align="left"
                   />
-                  <p className={styles.aboutParagraph}>
+                  <p className={`${styles.aboutParagraph} ${styles.aboutIntroParagraph}`}>
                     FGR Career Development Center is a workforce-development
                     institution with established competencies in training, skills
                     development, entrepreneurship, professional development and
                     programme implementation.
                   </p>
-                  <p className={styles.aboutParagraph}>
+                  <p className={`${styles.aboutParagraph} ${styles.aboutMobileHidden}`}>
                     The Centre also provides project management, organisational support
                     and technical assistance to partners implementing development and
                     capacity-building initiatives.
                   </p>
-                  <p className={styles.aboutParagraph}>
+                  <p className={`${styles.aboutParagraph} ${styles.aboutMobileHidden}`}>
                     We work with individuals, businesses, institutions, government,
                     development organisations, professional bodies and other partners
                     to create pathways to skills, employment, enterprise and
@@ -431,7 +439,7 @@ export default async function Home() {
       {/* ============================================================
           6. PARTNERSHIPS — Stronger Together
           ============================================================ */}
-      <section className={styles.section} aria-labelledby="partner-banner-heading">
+      <section className={`${styles.section} ${styles.partnerSection}`} aria-labelledby="partner-banner-heading">
         <Container size="wide">
           <MotionSection direction="up">
             <div className={styles.partnerBanner}>
@@ -440,9 +448,11 @@ export default async function Home() {
                   eyebrow="PARTNERSHIPS"
                   title={<span id="partner-banner-heading">Stronger Together</span>}
                   align="left"
+                  className={styles.partnerSectionHeading}
                 />
                 <p className={styles.partnerHeading}>
-                  Sustainable workforce development requires collaboration.
+                  <span>Sustainable workforce</span>
+                  <span>development requires collaboration.</span>
                 </p>
                 <p className={styles.partnerText}>
                   FGR Career Development Center welcomes partnerships with government
@@ -515,42 +525,6 @@ export default async function Home() {
         </Container>
       </section>
 
-      {/* ============================================================
-          8. HOME PAGE FINAL CALL TO ACTION
-          ============================================================ */}
-      <section className={styles.finalCta} aria-labelledby="final-cta-heading">
-        <Container size="wide">
-          <MotionSection direction="up" duration={0.6}>
-            <div className={styles.finalCtaContainer}>
-              <h2 id="final-cta-heading" className={styles.finalCtaHeading}>
-                Your Next Opportunity Starts With a Skill.
-              </h2>
-              <p className={styles.finalCtaText}>
-                Whether you are looking to develop new skills, advance your career,
-                strengthen your business or explore partnership opportunities, FGR
-                Career Development Center is ready to connect you to the next step.
-              </p>
-              <div className={styles.finalCtaActions}>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  href={PRIMARY_CTAS.register.href}
-                  rightIcon={<ArrowUpRight size={18} />}
-                >
-                  {PRIMARY_CTAS.register.label}
-                </Button>
-                <Button
-                  variant="outline-pearl"
-                  size="lg"
-                  href={PRIMARY_CTAS.partner.href}
-                >
-                  {PRIMARY_CTAS.partner.label}
-                </Button>
-              </div>
-            </div>
-          </MotionSection>
-        </Container>
-      </section>
     </>
   );
 }

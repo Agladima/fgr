@@ -7,6 +7,21 @@
   overflow: hidden;
 }
 
+@media (max-width: 767px) {
+  .headerSection p {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+
+  .headerSection,
+  .section {
+    padding-top: var(--space-10);
+    padding-bottom: var(--space-10);
+  }
+}
+
 .headerGlow {
   position: absolute;
   top: -30%;
@@ -139,4 +154,19 @@
   max-width: 650px;
   line-height: var(--line-height-relaxed);
   margin-bottom: 0;
+}
+
+.enquireText span {
+  display: inline;
+}
+
+@media (max-width: 767px) {
+  .enquireText {
+    font-size: 0.85rem;
+  }
+
+  .enquireText span {
+    display: block;
+    white-space: nowrap;
+  }
 }
